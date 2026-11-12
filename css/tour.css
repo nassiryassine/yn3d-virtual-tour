@@ -1,0 +1,87 @@
+.tour-body{height:100vh;overflow:hidden}
+.tour-header{height:82px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 4vw;position:relative;z-index:5;background:#111}
+.tour-title{display:flex;flex-direction:column;gap:5px}.tour-title .eyebrow{font-size:8px}.tour-title strong{font-size:11px;letter-spacing:1.25px;font-weight:500}.tour-title i{color:var(--gold);font-style:normal}
+.back-link{font-size:9px;letter-spacing:1.2px;color:#aaa}
+.tour-layout{height:calc(100vh - 82px);display:grid;grid-template-columns:330px 1fr}
+.tour-sidebar{background:#171716;border-right:1px solid var(--line);padding:30px 25px 22px;display:flex;flex-direction:column;min-height:0;overflow:auto}
+.tour-sidebar h1{font-size:38px;line-height:1.05;font-weight:500;margin:15px 0}
+.sidebar-desc{font-size:11px;color:#999;line-height:1.7;margin:0 0 20px}
+.sidebar-section-title{font-size:8px;letter-spacing:1.5px;color:#c7a875;font-weight:700}
+.scene-list{display:flex;flex-direction:column;gap:7px;max-height:170px;overflow:auto;margin-top:10px}
+.scene-button{background:#20201e;border:1px solid #333;color:#ddd;text-align:left;padding:11px 12px;display:flex;align-items:center;gap:11px;cursor:pointer;font:inherit;font-size:10px;width:100%}
+.scene-button.active{border-color:var(--gold);color:var(--gold);background:#28241e}
+.scene-number{color:var(--gold);font-size:9px}.scene-name{flex:1}.scene-chevron{font-size:17px;color:#81765f}
+.empty-scenes{font-size:10px;color:#777;line-height:1.7;border:1px dashed #444;padding:15px}
+.route-map-card{border:1px solid #39352e;background:#1c1b19;padding:13px 12px 10px;margin-top:19px}
+.route-map-heading{display:flex;justify-content:space-between;align-items:center}
+.map-tag{font-size:7px;letter-spacing:1px;color:#827a6d;border:1px solid #494238;padding:3px 5px}
+.map-caption{font-size:9px;color:#8e8980;line-height:1.5;margin:8px 0 0}
+.route-map{height:82px;position:relative;margin-top:3px}
+.route-lines{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.route-lines path{stroke:#8e7650;stroke-width:1.5;fill:none;stroke-dasharray:3 3}
+.map-node{position:absolute;top:50%;transform:translate(-50%,-50%);width:29px;height:29px;border-radius:50%;border:1px solid #5d564a;background:#292722;color:#817a6e;font-size:8px;font-weight:700;z-index:1;cursor:pointer}
+.map-node.available{border-color:#b99a68;color:#d7bd91;background:#302a20}
+.map-node.active{background:#c6a56b;color:#17130d;border:2px solid #f1d9ad;box-shadow:0 0 0 5px #c6a56b30}
+.map-node:disabled{cursor:default;opacity:.35}
+.map-ends{display:flex;justify-content:space-between;color:#777064;font-size:7px;letter-spacing:1.3px}
+.map-disclaimer{font-size:8px;color:#746e64;line-height:1.5;margin:8px 0 0}
+.tour-help{display:flex;align-items:center;gap:10px;margin-top:auto;padding:18px 0 12px;color:#888;font-size:9px;line-height:1.7}
+.gold-dot{width:7px;height:7px;border-radius:50%;background:var(--gold);flex:none}
+.upload-control{display:block;text-align:center;padding:13px 10px;border:1px solid #756044;color:var(--gold);font-size:9px;letter-spacing:1px;cursor:pointer}
+.upload-control input{display:none}.upload-note{color:#6f6b64;font-size:8px;line-height:1.6;margin-top:8px}
+.viewer-section{position:relative;min-width:0;background:#0c0c0c}
+#pano{position:absolute;inset:0;overflow:hidden}#pano canvas{width:100%;height:100%}
+.viewer-placeholder{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:25px;background:radial-gradient(ellipse at center,#29251f 0,#141414 55%,#0b0b0b 100%)}
+.placeholder-icon{width:80px;height:80px;border:1px solid var(--gold);border-radius:50%;display:grid;place-items:center;color:var(--gold);font-family:'Playfair Display';font-size:25px}
+.viewer-placeholder h2{font-size:27px;margin:25px 0 10px}.viewer-placeholder p{max-width:390px;color:#999;font-size:11px;line-height:1.8}
+.viewer-topline{position:absolute;top:22px;left:25px;right:25px;display:flex;justify-content:space-between;color:#aaa;font-size:8px;letter-spacing:1.4px;pointer-events:none}
+.viewer-controls{position:absolute;right:22px;bottom:28px;display:flex;gap:7px}.viewer-controls button{width:38px;height:38px;border:1px solid #777;background:#111b;color:#fff;font-size:18px;cursor:pointer}
+.viewer-hint{position:absolute;left:25px;bottom:38px;font-size:8px;letter-spacing:1.5px;color:#ddd;pointer-events:none}.viewer-hint span{color:var(--gold);padding:0 7px}
+.tour-hotspot{width:40px;height:40px;border:1px solid #f7e7c8;border-radius:50%;background:#c6a56b;color:#17130d;font-size:22px;display:grid;place-items:center;cursor:pointer;box-shadow:0 0 0 6px #c6a56b44,0 3px 15px #0009;transition:transform .2s}
+.tour-hotspot:hover{transform:scale(1.12)}.tour-hotspot-back{background:#24221e;color:#e2c99e;border-color:#c6a56b}
+.direction-legend{position:absolute;right:22px;bottom:82px;color:#a8a095;font-size:7px;letter-spacing:1.1px;pointer-events:none}
+.legend-arrow{color:#d9bd8b;font-size:13px;margin-right:5px}
+@media(max-width:900px){.tour-layout{grid-template-columns:290px 1fr}.tour-sidebar{padding:24px 18px}}
+@media(max-width:760px){.tour-body{height:auto;min-height:100vh;overflow:auto}.tour-header{height:70px;padding:0 18px}.tour-title{display:none}.back-link{font-size:8px}.tour-layout{height:auto;min-height:calc(100vh - 70px);display:flex;flex-direction:column}.tour-sidebar{padding:22px 18px;border-right:0;border-bottom:1px solid var(--line);overflow:visible}.tour-sidebar h1{font-size:31px;margin:10px 0}.sidebar-desc{margin-bottom:13px}.scene-list{max-height:130px}.route-map-card{margin-top:14px}.tour-help{display:none}.upload-control{margin-top:14px}.viewer-section{height:65vh;min-height:420px}.viewer-placeholder h2{font-size:22px}.viewer-topline{top:15px;left:15px;right:15px}.viewer-controls{right:12px;bottom:15px}.viewer-hint{left:15px;bottom:28px}.direction-legend{display:none}}
+
+/* ===== ROUTE MAP VISIBILITY FIX ===== */
+
+.route-map,
+#route-map {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: 100% !important;
+    min-height: 190px !important;
+    height: auto !important;
+    overflow: visible !important;
+    position: relative;
+    margin-top: 12px;
+    padding: 10px;
+    box-sizing: border-box;
+    background: #171717;
+    border: 1px solid rgba(212, 175, 55, 0.35);
+    border-radius: 10px;
+}
+
+.route-map svg,
+#route-map svg {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: 100% !important;
+    height: 180px !important;
+    min-height: 180px !important;
+    overflow: visible !important;
+}
+
+.route-map svg path,
+#route-map svg path {
+    stroke: #c9a44c;
+}
+
+.route-map svg circle,
+#route-map svg circle {
+    visibility: visible !important;
+    opacity: 1 !important;
+}
