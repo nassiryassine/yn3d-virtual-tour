@@ -85,3 +85,29 @@
     visibility: visible !important;
     opacity: 1 !important;
 }
+
+/* Existing project styles are preserved; additions below enhance the tour controls. */
+.tour-audio-panel{margin-top:18px;padding:13px 12px;background:#1c1b19;border:1px solid #39352e;display:flex;flex-direction:column;gap:9px}
+.audio-file-label{display:block;padding:10px 8px;border:1px solid #756044;color:var(--gold);font-size:8px;letter-spacing:.7px;cursor:pointer;line-height:1.5}
+.audio-file-label.secondary{border-color:#514b40;color:#c8c0b1}
+.audio-file-label input{display:none}
+.audio-controls{display:flex;align-items:center;gap:10px;color:#aaa;font-size:9px}
+.audio-controls button{width:32px;height:32px;border:1px solid var(--gold);background:#29241d;color:var(--gold);cursor:pointer}
+.audio-controls button:disabled{opacity:.4;cursor:not-allowed}
+.thumbnail-strip{position:absolute;z-index:4;left:16px;right:16px;bottom:88px;display:flex;gap:9px;overflow-x:auto;padding:8px 4px 10px;background:linear-gradient(90deg,#101010df,#101010b8);scrollbar-width:thin;scrollbar-color:#8f744b #24211d}
+.thumbnail-strip[hidden]{display:none}
+.thumbnail-button{flex:0 0 112px;min-width:0;padding:4px;border:1px solid #6c6252;background:#171614;color:#ddd;text-align:left;cursor:pointer;opacity:.78}
+.thumbnail-button.active{border:2px solid var(--gold);opacity:1;background:#2a251d}
+.thumbnail-button img{display:block;width:100%;height:52px;object-fit:cover;background:#292929}
+.thumbnail-button span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:5px 2px 2px;font-size:8px}
+.viewer-controls button.active{background:var(--gold);color:#17130d;border-color:#f1d9ad}
+.viewer-controls button:disabled{opacity:.4}
+@media(max-width:760px){
+  .tour-audio-panel{margin-top:14px}
+  .viewer-section{height:70vh;min-height:470px}
+  .thumbnail-strip{left:8px;right:8px;bottom:70px;gap:6px}
+  .thumbnail-button{flex-basis:92px}
+  .thumbnail-button img{height:45px}
+  .viewer-controls{bottom:12px;left:8px;right:8px;justify-content:flex-end}
+  .viewer-hint{bottom:26px}
+}
