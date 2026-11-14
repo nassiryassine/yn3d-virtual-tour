@@ -1,13 +1,16 @@
+
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "yn3d-virtual-tour",
   "main": "src/index.js",
   "compatibility_date": "2026-11-14",
+
   "assets": {
     "directory": "./",
     "binding": "ASSETS",
     "run_worker_first": ["/api/*"]
   },
+
   "d1_databases": [
     {
       "binding": "DB",
@@ -15,8 +18,24 @@
       "database_id": "11d42c2a-0139-44c5-af18-c54c56c5d7e9"
     }
   ],
+
   "vars": {
     "GITHUB_REPO": "nassiryassine/yn3d-virtual-tour",
     "GITHUB_BRANCH": "feature/admin-panel"
+  },
+
+  "previews": {
+    "d1_databases": [
+      {
+        "binding": "DB",
+        "database_name": "yn3d-projects-preview",
+        "database_id": "d0e51434-127e-4171-ba05-cf64661d002d"
+      }
+    ],
+
+    "vars": {
+      "GITHUB_REPO": "nassiryassine/yn3d-virtual-tour",
+      "GITHUB_BRANCH": "feature/admin-panel"
+    }
   }
 }
