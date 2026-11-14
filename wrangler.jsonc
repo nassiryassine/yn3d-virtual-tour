@@ -1,0 +1,9 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "yn3d-virtual-tour",
+  "compatibility_date": "2026-11-14",
+  "assets": {
+    "directory": "./"
+  },
+  "previews": {}
+}
