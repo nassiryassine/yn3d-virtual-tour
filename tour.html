@@ -23,15 +23,11 @@
     <p class="sidebar-desc">Move between the hospital corridor viewpoints using the scene list, directional arrows or the route map.</p>
     <div class="sidebar-section-title">VIEWPOINTS</div>
     <div id="scene-list" class="scene-list"><div class="empty-scenes">Loading panorama scenes…</div></div>
-
     <div class="route-map-card">
       <div class="route-map-heading"><span class="sidebar-section-title">ROUTE MAP</span><span class="map-tag">SCHEMATIC</span></div>
       <p class="map-caption">Select a numbered point to jump to that viewpoint.</p>
       <div id="route-map" class="route-map" aria-label="Schematic corridor route map">
-        <svg class="route-lines" viewBox="0 0 280 82" preserveAspectRatio="none" aria-hidden="true">
-          <path d="M35 41 H245" />
-          <path d="M35 41 l8 -5 M35 41 l8 5 M245 41 l-8 -5 M245 41 l-8 5" />
-        </svg>
+        <svg class="route-lines" viewBox="0 0 280 82" preserveAspectRatio="none" aria-hidden="true"><path d="M35 41 H245" /><path d="M35 41 l8 -5 M35 41 l8 5 M245 41 l-8 -5 M245 41 l-8 5" /></svg>
         <button class="map-node" data-scene="0" style="left:8%" aria-label="Viewpoint 1">01</button>
         <button class="map-node" data-scene="1" style="left:36%" aria-label="Viewpoint 2">02</button>
         <button class="map-node" data-scene="2" style="left:64%" aria-label="Viewpoint 3">03</button>
@@ -40,27 +36,32 @@
       <div class="map-ends"><span>START</span><span>END</span></div>
       <p class="map-disclaimer">Illustrative route only — not an architectural floor plan.</p>
     </div>
-
+    <div class="tour-audio-panel">
+      <div class="sidebar-section-title">AUDIO GUIDE</div>
+      <label class="audio-file-label">＋ ADD AUDIO FOR THE WHOLE TOUR<input id="global-audio-upload" type="file" accept="audio/*"></label>
+      <label class="audio-file-label secondary">＋ ADD AUDIO FOR THIS VIEWPOINT<input id="scene-audio-upload" type="file" accept="audio/*"></label>
+      <div class="audio-controls"><button id="audio-toggle" type="button" aria-label="Play audio">▶</button><span id="audio-status">No audio selected</span></div>
+      <small class="upload-note">Audio selected here is a preview in this browser session. Permanent project audio will be managed through the project dashboard.</small>
+    </div>
     <div class="tour-help"><span class="gold-dot"></span><p>Drag to look around<br>Scroll to zoom in or out</p></div>
     <label class="upload-control">＋ PREVIEW YOUR 360° IMAGES<input id="pano-upload" type="file" accept="image/jpeg,image/png,image/webp" multiple></label>
-    <small class="upload-note">Local preview only. The four saved panoramas load from assets/panoramas/.</small>
+    <small class="upload-note">Local preview only. Saved panoramas load from assets/panoramas/.</small>
   </aside>
   <section class="viewer-section">
-    <div id="pano">
-      <div class="viewer-placeholder"><div class="placeholder-icon">360°</div><h2>Your hospital tour starts here.</h2><p>Place Panorama_1 to Panorama_4 inside assets/panoramas/ to load the saved viewpoints automatically.</p></div>
-    </div>
+    <div id="pano"><div class="viewer-placeholder"><div class="placeholder-icon">360°</div><h2>Your hospital tour starts here.</h2><p>Place Panorama_1 to Panorama_4 inside assets/panoramas/ to load the saved viewpoints automatically.</p></div></div>
     <div class="viewer-topline"><span id="scene-counter">LOADING SCENES…</span><span>YN 3D · IMMERSIVE HOSPITAL TOUR</span></div>
     <div class="viewer-controls">
       <button id="zoom-out" aria-label="Zoom out" title="Zoom out">−</button>
       <button id="zoom-in" aria-label="Zoom in" title="Zoom in">＋</button>
       <button id="reset-view" aria-label="Reset view" title="Reset view">◎</button>
+      <button id="gyro-toggle" aria-label="Enable phone motion" title="Enable phone motion">⌖</button>
       <button id="fullscreen" aria-label="Fullscreen" title="Fullscreen">⛶</button>
     </div>
     <div class="viewer-hint">DRAG TO EXPLORE <span>·</span> 360°</div>
     <div class="direction-legend"><span class="legend-arrow">➜</span> SELECT ARROW TO MOVE BETWEEN VIEWPOINTS</div>
+    <div id="thumbnail-strip" class="thumbnail-strip" aria-label="Panorama thumbnails"></div>
   </section>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/marzipano@0.10.2/dist/marzipano.js"></script>
 <script src="js/tour.js"></script>
-</body>
-</html>
+</body></html>
