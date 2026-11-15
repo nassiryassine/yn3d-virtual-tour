@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#111111">
+<title>لوحة إدارة YN 3D</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Tajawal:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:dark;--bg:#101010;--panel:#191919;--panel2:#202020;--line:#303030;--text:#f3f0e9;--muted:#aaa49a;--gold:#c6a46a;--red:#d96b64;--green:#72b58b}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Tajawal, sans-serif;min-height:100vh}button,input,textarea,select{font:inherit}button{cursor:pointer}.shell{max-width:1180px;margin:auto;padding:30px 22px}.top{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:22px;margin-bottom:30px}.brand{display:flex;align-items:center;gap:12px}.mark{font:700 32px 'DM Sans';letter-spacing:-2px}.mark b{color:var(--gold)}.brand small{color:var(--muted);font:600 10px 'DM Sans';letter-spacing:1.5px;direction:ltr;text-align:left}.top-actions{display:flex;gap:10px;align-items:center}.btn{border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:10px 16px;border-radius:8px;font-weight:700}.btn.primary{background:var(--gold);border-color:var(--gold);color:#17130d}.btn.danger{color:#ffaaa4;border-color:#663b38}.btn:disabled{opacity:.5;cursor:wait}.muted{color:var(--muted)}.login-wrap{max-width:430px;margin:9vh auto;padding:32px;background:var(--panel);border:1px solid var(--line);border-radius:16px}.login-wrap h1{margin:0 0 8px;font-size:27px}.login-wrap p{color:var(--muted);margin:0 0 24px}.field{display:flex;flex-direction:column;gap:7px;margin-bottom:15px}.field label{font-weight:700;font-size:14px}.field input,.field textarea,.field select{width:100%;background:#111;border:1px solid var(--line);border-radius:8px;padding:12px;color:var(--text);outline:none}.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--gold)}.field textarea{min-height:105px;resize:vertical}.message{padding:11px 13px;border-radius:8px;margin:12px 0;display:none}.message.error{display:block;background:#3a201f;color:#ffb9b2}.message.success{display:block;background:#1d3427;color:#a6e0b8}.dashboard{display:none}.welcome{display:flex;justify-content:space-between;align-items:end;margin-bottom:24px}.welcome h1{font-size:29px;margin:0 0 5px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px}.stat,.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px}.stat{padding:18px}.stat span{color:var(--muted);font-size:13px}.stat strong{display:block;font:700 28px 'DM Sans';margin-top:7px}.layout{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(300px,.75fr);gap:18px}.panel{padding:20px;margin-bottom:18px}.panel h2{font-size:20px;margin:0 0 17px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 13px}.full{grid-column:1/-1}.form-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:5px}.project-list{display:flex;flex-direction:column;gap:10px}.project{display:flex;gap:13px;padding:12px;background:#141414;border:1px solid var(--line);border-radius:9px;align-items:center}.thumb{width:78px;height:66px;flex:0 0 78px;border-radius:6px;background:#292929;object-fit:cover}.project-info{min-width:0;flex:1}.project-info strong{display:block;font-size:16px;overflow-wrap:anywhere}.project-info small{color:var(--muted)}.project-actions{display:flex;gap:6px;flex-wrap:wrap}.project-actions .btn{padding:7px 10px;font-size:12px}.empty{padding:25px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:9px}.hint{font-size:12px;color:var(--muted);line-height:1.7;margin-top:5px}.status{display:inline-block;border-radius:30px;padding:3px 9px;font-size:11px;margin-top:5px}.status.published{background:#1c3929;color:#9ad9ad}.status.draft{background:#383126;color:#d8bd8a}.hidden{display:none!important}@media(max-width:800px){.layout{grid-template-columns:1fr}.stats{gap:8px}.stat{padding:13px}.shell{padding:18px 13px}.welcome{align-items:start;gap:12px;flex-direction:column}}@media(max-width:520px){.form-grid{grid-template-columns:1fr}.full{grid-column:auto}.top{align-items:flex-start}.top-actions{flex-direction:column;align-items:stretch}.project{align-items:flex-start;flex-wrap:wrap}.project-actions{width:100%;padding-right:90px}.stats{grid-template-columns:1fr 1fr}.stat:last-child{grid-column:1/-1}}
+</style>
+</head>
+<body>
+<div id="loginView" class="login-wrap">
+  <div class="brand" style="margin-bottom:25px"><div class="mark">YN<b>.</b></div><small>ADMINISTRATION<br>VIRTUAL TOUR</small></div>
+  <h1>تسجيل الدخول</h1><p>أهلاً بك في لوحة إدارة مشاريع YN 3D.</p>
+  <form id="loginForm">
+    <div class="field"><label for="username">اسم المستخدم</label><input id="username" name="username" autocomplete="username" required></div>
+    <div class="field"><label for="password">كلمة المرور</label><input id="password" name="password" type="password" autocomplete="current-password" required></div>
+    <div id="loginMessage" class="message"></div>
+    <button class="btn primary" id="loginButton" type="submit" style="width:100%">دخول إلى لوحة التحكم</button>
+  </form>
+</div>
+
+<div id="dashboard" class="dashboard">
+  <div class="shell">
+    <header class="top">
+      <div class="brand"><div class="mark">YN<b>.</b></div><small>ADMINISTRATION<br>VIRTUAL TOUR</small></div>
+      <div class="top-actions"><a class="btn" href="/" style="text-decoration:none">عرض الموقع ↗</a><button class="btn" id="logoutButton">تسجيل الخروج</button></div>
+    </header>
+    <section class="welcome"><div><h1>مرحباً بك 👋</h1><div class="muted">إدارة المشاريع والتصنيفات والصور</div></div><button class="btn primary" id="newProjectButton">＋ مشروع جديد</button></section>
+    <div class="stats">
+      <div class="stat"><span>إجمالي المشاريع</span><strong id="totalProjects">—</strong></div>
+      <div class="stat"><span>مشاريع منشورة</span><strong id="publishedProjects">—</strong></div>
+      <div class="stat"><span>التصنيفات</span><strong id="totalCategories">—</strong></div>
+    </div>
+    <div class="layout">
+      <section>
+        <div class="panel" id="editorPanel">
+          <h2 id="editorTitle">إضافة مشروع جديد</h2>
+          <form id="projectForm">
+            <input type="hidden" id="projectId">
+            <div class="form-grid">
+              <div class="field"><label for="projectTitle">اسم المشروع *</label><input id="projectTitle" required maxlength="180" placeholder="مثال: فيلا سكنية حديثة"></div>
+              <div class="field"><label for="projectSlug">الرابط المختصر</label><input id="projectSlug" maxlength="80" placeholder="modern-villa"><div class="hint">اتركه فارغاً لإنشائه تلقائياً من الاسم.</div></div>
+              <div class="field"><label for="projectCategory">التصنيف</label><select id="projectCategory"><option value="">بدون تصنيف</option></select></div>
+              <div class="field"><label for="projectLocation">الموقع</label><input id="projectLocation" placeholder="الرياض، السعودية"></div>
+              <div class="field full"><label for="projectDescription">وصف المشروع</label><textarea id="projectDescription" placeholder="نبذة مختصرة عن المشروع..."></textarea></div>
+              <div class="field"><label for="projectStatus">حالة المشروع</label><select id="projectStatus"><option value="draft">مسودة</option><option value="published">منشور</option></select></div>
+              <div class="field"><label for="projectOrder">ترتيب العرض</label><input id="projectOrder" type="number" value="0"></div>
+              <div class="field full"><label for="projectImages">صور المشروع</label><input id="projectImages" type="file" accept="image/jpeg,image/png,image/webp" multiple><div class="hint">JPG أو PNG أو WEBP، بحد أقصى 20 ميجابايت للصورة. يجب حفظ المشروع أولاً ثم تُرفع الصور إلى مستودع GitHub.</div></div>
+            </div>
+            <div id="projectMessage" class="message"></div>
+            <div class="form-actions"><button class="btn primary" id="saveProjectButton" type="submit">حفظ المشروع</button><button class="btn" type="button" id="cancelEditButton">إلغاء</button></div>
+          </form>
+        </div>
+        <div class="panel">
+          <h2>المشاريع الحالية</h2>
+          <div id="projectList" class="project-list"><div class="empty">جارٍ تحميل المشاريع...</div></div>
+        </div>
+      </section>
+      <aside>
+        <div class="panel">
+          <h2>إدارة التصنيفات</h2>
+          <form id="categoryForm">
+            <div class="field"><label for="categoryName">اسم التصنيف</label><input id="categoryName" required placeholder="مثال: سكني"></div>
+            <div class="field"><label for="categorySlug">الرابط المختصر (اختياري)</label><input id="categorySlug" placeholder="residential"></div>
+            <button class="btn primary" id="addCategoryButton" type="submit">إضافة التصنيف</button>
+          </form>
+          <div id="categoryMessage" class="message"></div>
+          <div id="categoryList" class="hint" style="margin-top:17px">جارٍ تحميل التصنيفات...</div>
+        </div>
+        <div class="panel">
+          <h2>ملاحظات</h2>
+          <p class="hint">• يتم حفظ بيانات المشاريع والتصنيفات في قاعدة بيانات D1.</p>
+          <p class="hint">• يتم رفع الصور إلى مستودع GitHub على الفرع feature/admin-panel.</p>
+          <p class="hint">• لا تشارك بيانات الدخول أو الرموز السرية مع أي شخص.</p>
+        </div>
+      </aside>
+    </div>
+  </div>
+</div>
+<script>
+const $ = id => document.getElementById(id);
+let projects = [];
+let categories = [];
+let busy = false;
+
+function showMessage(id, message, type='error') {
+  const el = $(id); el.textContent = message; el.className = 'message ' + type;
+}
+function clearMessage(id) { const el=$(id); el.textContent=''; el.className='message'; }
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+async function api(path, options={}) {
+  const response = await fetch('/api' + path, {credentials:'same-origin', ...options});
+  const data = await response.json().catch(()=>({}));
+  if (!response.ok) throw new Error(data.error || ('حدث خطأ (' + response.status + ')'));
+  return data;
+}
+function setBusy(value, buttonId) {
+  busy=value;
+  if(buttonId) $(buttonId).disabled=value;
+}
+function showDashboard() { $('loginView').classList.add('hidden'); $('dashboard').style.display='block'; }
+function showLogin() { $('dashboard').style.display='none'; $('loginView').classList.remove('hidden'); }
+async function checkSession() {
+  try { await api('/me'); showDashboard(); await refreshAll(); }
+  catch { showLogin(); }
+}
+async function refreshAll() {
+  const [p,c]=await Promise.all([api('/projects'),api('/categories')]);
+  projects=p.projects||[]; categories=c.categories||[];
+  renderProjects(); renderCategories(); renderCategoryOptions();
+  $('totalProjects').textContent=projects.length;
+  $('publishedProjects').textContent=projects.filter(x=>x.status==='published').length;
+  $('totalCategories').textContent=categories.length;
+}
+function renderCategoryOptions(selected='') {
+  $('projectCategory').innerHTML='<option value="">بدون تصنيف</option>'+categories.map(c=>'<option value="'+c.id+'">'+escapeHtml(c.name)+'</option>').join('');
+  $('projectCategory').value=String(selected||'');
+}
+function renderCategories() {
+  $('categoryList').innerHTML=categories.length?categories.map(c=>'<div style="display:flex;justify-content:space-between;border-top:1px solid var(--line);padding:10px 0"><strong>'+escapeHtml(c.name)+'</strong><span class="muted">'+escapeHtml(c.slug)+'</span></div>').join(''):'<div class="empty">لا توجد تصنيفات بعد.</div>';
+}
+function renderProjects() {
+  if(!projects.length){$('projectList').innerHTML='<div class="empty">لا توجد مشاريع بعد. أضف مشروعك الأول من النموذج.</div>';return;}
+  $('projectList').innerHTML=projects.map(p=>{
+    const image=p.cover_image?'<img class="thumb" src="'+escapeHtml(p.cover_image)+'" alt="">':'<div class="thumb" style="display:grid;place-items:center;color:var(--gold)">YN.</div>';
+    return '<article class="project">'+image+'<div class="project-info"><strong>'+escapeHtml(p.title)+'</strong><small>'+escapeHtml(p.category_name||'بدون تصنيف')+' · '+escapeHtml(p.location||'')+'</small><br><span class="status '+(p.status==='published'?'published':'draft')+'">'+(p.status==='published'?'منشور':'مسودة')+'</span></div><div class="project-actions"><button class="btn" data-edit="'+p.id+'">تعديل</button><button class="btn danger" data-delete="'+p.id+'">حذف</button></div></article>';
+  }).join('');
+}
+function resetForm() {
+  $('projectForm').reset(); $('projectId').value=''; $('projectOrder').value='0'; $('editorTitle').textContent='إضافة مشروع جديد'; $('saveProjectButton').textContent='حفظ المشروع'; renderCategoryOptions(); clearMessage('projectMessage');
+}
+function editProject(id) {
+  const p=projects.find(x=>Number(x.id)===Number(id)); if(!p)return;
+  $('projectId').value=p.id; $('projectTitle').value=p.title||''; $('projectSlug').value=p.slug||'';
+  $('projectLocation').value=p.location||''; $('projectDescription').value=p.description||'';
+  $('projectStatus').value=p.status||'draft'; $('projectOrder').value=p.sort_order||0;
+  renderCategoryOptions(p.category_id); $('projectImages').value='';
+  $('editorTitle').textContent='تعديل المشروع'; $('saveProjectButton').textContent='حفظ التعديلات';
+  clearMessage('projectMessage'); $('editorPanel').scrollIntoView({behavior:'smooth',block:'start'});
+}
+$('loginForm').addEventListener('submit',async e=>{
+  e.preventDefault(); clearMessage('loginMessage'); setBusy(true,'loginButton');
+  try { await api('/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:$('username').value,password:$('password').value})}); $('password').value=''; showDashboard(); await refreshAll(); }
+  catch(err){showMessage('loginMessage',err.message);}
+  finally{setBusy(false,'loginButton');}
+});
+$('logoutButton').addEventListener('click',async()=>{try{await api('/logout',{method:'POST'});}catch{}showLogin();});
+$('newProjectButton').addEventListener('click',()=>{resetForm();$('editorPanel').scrollIntoView({behavior:'smooth'});});
+$('cancelEditButton').addEventListener('click',resetForm);
+$('projectList').addEventListener('click',async e=>{
+  const edit=e.target.closest('[data-edit]'); const del=e.target.closest('[data-delete]');
+  if(edit) editProject(edit.dataset.edit);
+  if(del){
+    const id=del.dataset.delete; const p=projects.find(x=>String(x.id)===String(id));
+    if(!confirm('هل تريد حذف المشروع "'+(p?.title||'')+'"؟ لا يمكن التراجع عن هذه العملية.'))return;
+    del.disabled=true;
+    try{await api('/projects/'+id,{method:'DELETE'});await refreshAll();showMessage('projectMessage','تم حذف المشروع.','success');}
+    catch(err){alert(err.message);del.disabled=false;}
+  }
+});
+$('projectForm').addEventListener('submit',async e=>{
+  e.preventDefault(); if(busy)return; clearMessage('projectMessage'); setBusy(true,'saveProjectButton');
+  try{
+    const id=$('projectId').value;
+    const payload={title:$('projectTitle').value.trim(),slug:$('projectSlug').value.trim(),description:$('projectDescription').value,category_id:$('projectCategory').value||null,location:$('projectLocation').value,status:$('projectStatus').value,sort_order:Number($('projectOrder').value)||0};
+    let saved;
+    if(id){await api('/projects/'+id,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});saved={id:Number(id)};}
+    else saved=await api('/projects',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    const files=Array.from($('projectImages').files||[]);
+    let coverUrl=null;
+    for(let i=0;i<files.length;i++){
+      const form=new FormData();form.append('file',files[i]);form.append('project_id',String(saved.id));form.append('image_type',i===0?'cover':'gallery');form.append('is_cover',i===0?'true':'false');
+      const uploaded=await api('/upload',{method:'POST',body:form});if(i===0)coverUrl=uploaded.url;
+    }
+    if(coverUrl){payload.cover_image=coverUrl;await api('/projects/'+saved.id,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});}
+    await refreshAll();resetForm();
+    showMessage('projectMessage',files.length?'تم حفظ المشروع ورفع الصور بنجاح.':'تم حفظ المشروع بنجاح.','success');
+  }catch(err){showMessage('projectMessage',err.message);}
+  finally{setBusy(false,'saveProjectButton');}
+});
+$('categoryForm').addEventListener('submit',async e=>{
+  e.preventDefault();if(busy)return;clearMessage('categoryMessage');setBusy(true,'addCategoryButton');
+  try{await api('/categories',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:$('categoryName').value.trim(),slug:$('categorySlug').value.trim()})});$('categoryForm').reset();await refreshAll();showMessage('categoryMessage','تمت إضافة التصنيف.','success');}
+  catch(err){showMessage('categoryMessage',err.message);}
+  finally{setBusy(false,'addCategoryButton');}
+});
+checkSession();
+</script>
+</body>
+</html>
