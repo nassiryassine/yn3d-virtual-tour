@@ -3,11 +3,28 @@
  const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  if(!slug){root.innerHTML='<div class="project-loading">Project link is missing. <a href="index.html">Back to portfolio</a></div>';return;}
  function videoMarkup(url){
-  const safe=esc(url),yt=url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{6,})/),vm=url.match(/vimeo\.com\/(\d+)/);
-  if(yt)return '<div class="video-item"><iframe src="https://www.youtube-nocookie.com/embed/'+yt[1]+'" title="Project video" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>';
-  if(vm)return '<div class="video-item"><iframe src="https://player.vimeo.com/video/'+vm[1]+'" title="Project video" loading="lazy" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div>';
-  if(/\.(mp4|webm|ogg)(\?.*)?$/i.test(url))return '<div class="video-item"><video controls preload="metadata" src="'+safe+'"></video></div>';
-  return '<div class="media-empty">Unsupported video link format.</div>';
+  const safe=esc(url);
+  let parsed;
+  try{parsed=new URL(url);}catch{return '<div class="media-empty">Invalid video link.</div>';}
+  const host=parsed.hostname.toLowerCase().replace(/^www\\./,'');
+  let youtubeId='';
+  if(host==='youtu.be')youtubeId=parsed.pathname.split('/').filter(Boolean)[0]||'';
+  else if(host==='youtube.com'||host==='m.youtube.com'||host==='youtube-nocookie.com'){
+   const parts=parsed.pathname.split('/').filter(Boolean);
+   if(parsed.pathname==='/watch')youtubeId=parsed.searchParams.get('v')||'';
+   else if(['embed','shorts','live','v'].includes(parts[0]))youtubeId=parts[1]||'';
+  }
+  if(/^[A-Za-z0-9_-]{11}$/.test(youtubeId))return '<div class="video-item"><iframe src="https://www.youtube-nocookie.com/embed/'+youtubeId+'" title="Project video" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>';
+  const vimeoMatch=host==='vimeo.com'||host==='player.vimeo.com'?parsed.pathname.match(/\\/(?:video\\/)?(\\d+)/):null;
+  if(vimeoMatch)return '<div class="video-item"><iframe src="https://player.vimeo.com/video/'+vimeoMatch[1]+'" title="Project video" loading="lazy" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div>';
+  let driveId='';
+  if(host==='drive.google.com'){
+   const fileMatch=parsed.pathname.match(/\\/file\\/d\\/([A-Za-z0-9_-]+)/);
+   driveId=fileMatch?fileMatch[1]:(parsed.searchParams.get('id')||'');
+  }
+  if(/^[A-Za-z0-9_-]{10,}$/.test(driveId))return '<div class="video-item"><iframe src="https://drive.google.com/file/d/'+driveId+'/preview" title="Project video" loading="lazy" allow="autoplay" allowfullscreen></iframe></div>';
+  if(['http:','https:'].includes(parsed.protocol)&&/\\.(mp4|webm|ogg)$/i.test(parsed.pathname))return '<div class="video-item"><video controls playsinline preload="metadata" src="'+safe+'"></video></div>';
+  return '<div class="media-empty">صيغة الرابط غير مدعومة. استخدم YouTube أو Vimeo أو Google Drive.</div>';
  }
  try{
   const response=await fetch('/api/public/projects/'+encodeURIComponent(slug)),data=await response.json();
