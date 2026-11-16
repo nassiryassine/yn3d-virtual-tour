@@ -89,10 +89,13 @@
    modal.classList.add('open');
    modal.setAttribute('aria-hidden','false');
    document.body.classList.add('panoee-viewer-open');
+   const motionPermission=enableMotion();
+   let fullscreenRequest=null;
    if(panel.requestFullscreen){
-    try{await panel.requestFullscreen();}catch(error){/* Fullscreen may be blocked; modal remains full-window. */}
+    try{fullscreenRequest=panel.requestFullscreen();}catch(error){/* Fullscreen may be blocked; modal remains full-window. */}
    }
-   const enabled=await enableMotion();
+   const enabled=await motionPermission;
+   if(fullscreenRequest){try{await fullscreenRequest;}catch(error){/* Full-window modal remains available. */}}
    if(!enabled && (window.DeviceMotionEvent||window.DeviceOrientationEvent)){
     let notice=modal.querySelector('.panoee-motion-notice');
     if(!notice){notice=document.createElement('p');notice.className='panoee-motion-notice';notice.textContent='إذا لم تعمل حركة الهاتف، اسمح بالوصول إلى مستشعر الحركة من إعدادات المتصفح.';panel.appendChild(notice);}
