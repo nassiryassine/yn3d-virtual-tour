@@ -314,6 +314,26 @@ async function handleApi(request, env) {
         "INSERT INTO project_images (project_id, github_path, image_url, image_type, sort_order) VALUES (?, ?, ?, ?, ?)"
       ).bind(projectId, "external-video-" + projectId + "-" + i, value, "video", i).run();
     }
+    // Store the optional Panoee tour in the existing media table; never touch internal panoramas.
+    if (Object.prototype.hasOwnProperty.call(body, "tourSource")) {
+      const tourSource = body.tourSource === "panoee" ? "panoee" : "internal";
+      const panoeeUrl = String(body.panoeeUrl || "").trim();
+      let savedTourUrl = "";
+      if (tourSource === "panoee") {
+        let parsed;
+        try { parsed = new URL(panoeeUrl); } catch { return json({ error: "رابط Panoee غير صالح." }, 400); }
+        if (parsed.protocol !== "https:" || parsed.hostname !== "tour.panoee.net" || !/^\/[A-Za-z0-9_-]+(?:\/.*)?$/.test(parsed.pathname)) {
+          return json({ error: "يرجى إدخال رابط جولة صحيح من tour.panoee.net." }, 400);
+        }
+        savedTourUrl = parsed.href;
+      }
+      await env.DB.prepare("DELETE FROM project_images WHERE project_id = ? AND image_type = 'externalTour'").bind(projectId).run();
+      if (savedTourUrl) {
+        await env.DB.prepare(
+          "INSERT INTO project_images (project_id, github_path, image_url, image_type, sort_order) VALUES (?, ?, ?, ?, ?)"
+        ).bind(projectId, "external-panoee-tour-" + projectId, savedTourUrl, "externalTour", 0).run();
+      }
+    }
     return json({ ok: true });
   }
 
