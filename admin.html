@@ -52,7 +52,7 @@
               <div class="field"><label for="projectOrder">ترتيب العرض</label><input id="projectOrder" type="number" value="0"></div>
               <div class="field full"><label for="projectImages">صور المشروع</label><input id="projectImages" type="file" accept="image/jpeg,image/png,image/webp" multiple><div class="hint">JPG أو PNG أو WEBP، بحد أقصى 20 ميجابايت للصورة. يجب حفظ المشروع أولاً ثم تُرفع الصور إلى مستودع GitHub.</div></div>
               <div class="field full"><label for="projectVideos">روابط فيديوهات المشروع</label><textarea id="projectVideos" placeholder="ضع رابط كل فيديو في سطر مستقل (YouTube أو Vimeo أو MP4)"></textarea><div class="hint">يمكن إضافة أكثر من فيديو، رابط واحد في كل سطر.</div></div>
-              <div class="field full"><label for="projectTours">روابط الجولات الافتراضية 360°</label><textarea id="projectTours" placeholder="ضع رابط كل جولة افتراضية في سطر مستقل"></textarea><div class="hint">خصص هذا القسم لروابط جولات المشروع التفاعلية.</div></div>
+              <div class="field full"><label for="projectTourImages">صور الجولة الافتراضية 360°</label><input id="projectTourImages" type="file" accept="image/jpeg,image/png,image/webp" multiple><div class="hint">ارفع صور بانورامية حقيقية 360° بنسبة 2:1 (مثال 6000×3000). الصور العادية لن تعمل كجولة. الحد الأقصى 20MB للصورة.</div><div id="savedTourImages" class="hint">لا توجد مشاهد محفوظة بعد.</div></div>
             </div>
             <div id="projectMessage" class="message"></div>
             <div class="form-actions"><button class="btn primary" id="saveProjectButton" type="submit">حفظ المشروع</button><button class="btn" type="button" id="cancelEditButton">إلغاء</button></div>
@@ -136,7 +136,7 @@ function renderProjects() {
   }).join('');
 }
 function resetForm() {
-  $('projectForm').reset(); $('projectId').value=''; $('projectOrder').value='0'; $('editorTitle').textContent='إضافة مشروع جديد'; $('saveProjectButton').textContent='حفظ المشروع'; $('projectVideos').value=''; $('projectTours').value=''; renderCategoryOptions(); clearMessage('projectMessage');
+  $('projectForm').reset(); $('projectId').value=''; $('projectOrder').value='0'; $('editorTitle').textContent='إضافة مشروع جديد'; $('saveProjectButton').textContent='حفظ المشروع'; $('projectVideos').value=''; $('projectTourImages').value=''; $('savedTourImages').textContent='لا توجد مشاهد محفوظة بعد.'; renderCategoryOptions(); clearMessage('projectMessage');
 }
 async function editProject(id) {
   const p=projects.find(x=>Number(x.id)===Number(id)); if(!p)return;
@@ -144,13 +144,17 @@ async function editProject(id) {
   $('projectLocation').value=p.location||''; $('projectDescription').value=p.description||'';
   $('projectStatus').value=p.status||'draft'; $('projectOrder').value=p.sort_order||0;
   renderCategoryOptions(p.category_id); $('projectImages').value='';
-  $('projectVideos').value=''; $('projectTours').value='';
+  $('projectVideos').value=''; $('projectTourImages').value=''; $('savedTourImages').textContent='جارٍ تحميل المشاهد المحفوظة...';
   $('editorTitle').textContent='تعديل المشروع'; $('saveProjectButton').textContent='حفظ التعديلات';
   clearMessage('projectMessage'); $('editorPanel').scrollIntoView({behavior:'smooth',block:'start'});
   try {
     const media = await api('/projects/'+id+'/media');
     $('projectVideos').value=(media.media||[]).filter(x=>x.image_type==='video').map(x=>x.image_url).join('\n');
-    $('projectTours').value=(media.media||[]).filter(x=>x.image_type==='tour').map(x=>x.image_url).join('\n');
+    const savedTours=(media.media||[]).filter(x=>x.image_type==='tour360');
+    const legacyTours=(media.media||[]).filter(x=>x.image_type==='tour');
+    $('savedTourImages').textContent=savedTours.length
+      ? 'المشاهد المحفوظة: '+savedTours.length+' — '+savedTours.map((x,i)=>'مشهد '+(i+1)).join('، ')
+      : (legacyTours.length?'توجد روابط جولات قديمة محفوظة؛ لم يتم حذفها.':'لا توجد مشاهد 360° محفوظة بعد.');
   } catch(err) { showMessage('projectMessage','تعذر تحميل روابط الفيديو والجولات: '+err.message); }
 }
 $('loginForm').addEventListener('submit',async e=>{
@@ -181,17 +185,30 @@ $('projectForm').addEventListener('submit',async e=>{
     let saved;
     if(id){await api('/projects/'+id,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});saved={id:Number(id)};}
     else saved=await api('/projects',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-    const mediaLines=id=>$(id).value.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
-    await api('/projects/'+saved.id+'/media',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({videos:mediaLines('projectVideos'),tours:mediaLines('projectTours')})});
+    const mediaLines=fieldId=>$(fieldId).value.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+    await api('/projects/'+saved.id+'/media',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({videos:mediaLines('projectVideos')})});
     const files=Array.from($('projectImages').files||[]);
+    const tourFiles=Array.from($('projectTourImages').files||[]);
     let coverUrl=null;
     for(let i=0;i<files.length;i++){
       const form=new FormData();form.append('file',files[i]);form.append('project_id',String(saved.id));form.append('image_type',i===0?'cover':'gallery');form.append('is_cover',i===0?'true':'false');
       const uploaded=await api('/upload',{method:'POST',body:form});if(i===0)coverUrl=uploaded.url;
     }
     if(coverUrl){payload.cover_image=coverUrl;await api('/projects/'+saved.id,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});}
+    for(const file of tourFiles){
+      if(file.size>20*1024*1024) throw new Error('صورة الجولة '+file.name+' تتجاوز 20 ميجابايت.');
+      const dimensions=await new Promise((resolve,reject)=>{
+        const image=new Image(),url=URL.createObjectURL(file);
+        image.onload=()=>{URL.revokeObjectURL(url);resolve({width:image.naturalWidth,height:image.naturalHeight});};
+        image.onerror=()=>{URL.revokeObjectURL(url);reject(new Error('تعذر قراءة الصورة '+file.name));};
+        image.src=url;
+      });
+      if(Math.abs(dimensions.width/dimensions.height-2)>0.04) throw new Error(file.name+' ليست بانوراما 360° بنسبة 2:1.');
+      const form=new FormData();form.append('file',file);form.append('project_id',String(saved.id));form.append('image_type','tour360');
+      await api('/upload',{method:'POST',body:form});
+    }
     await refreshAll();resetForm();
-    showMessage('projectMessage',files.length?'تم حفظ المشروع ورفع الصور بنجاح.':'تم حفظ المشروع بنجاح.','success');
+    showMessage('projectMessage',(files.length||tourFiles.length)?'تم حفظ المشروع ورفع الصور ومشاهد الجولة بنجاح.':'تم حفظ المشروع بنجاح.','success');
   }catch(err){showMessage('projectMessage',err.message);}
   finally{setBusy(false,'saveProjectButton');}
 });
