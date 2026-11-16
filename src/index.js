@@ -217,7 +217,7 @@ async function handleApi(request, env) {
   if (projectMediaMatch && method === "GET") {
     const projectId = Number(projectMediaMatch[1]);
     const result = await env.DB.prepare(
-      "SELECT image_url, image_type, sort_order FROM project_images WHERE project_id = ? AND image_type IN ('video', 'tour') ORDER BY image_type, sort_order, id"
+      "SELECT image_url, image_type, sort_order FROM project_images WHERE project_id = ? AND image_type IN ('video', 'tour', 'tour360') ORDER BY image_type, sort_order, id"
     ).bind(projectId).all();
     return json({ media: result.results || [] });
   }
@@ -227,28 +227,21 @@ async function handleApi(request, env) {
     if (!exists) return json({ error: "المشروع غير موجود." }, 404);
     const body = await request.json().catch(() => ({}));
     const videos = Array.isArray(body.videos) ? body.videos : [];
-    const tours = Array.isArray(body.tours) ? body.tours : [];
     const validUrl = value => {
       const valueText = String(value || "").trim();
       return valueText.startsWith("https://") || valueText.startsWith("http://") || valueText.startsWith("/");
     };
-    if ([...videos, ...tours].some(value => !validUrl(value))) {
+    if (videos.some(value => !validUrl(value))) {
       return json({ error: "يجب إدخال روابط صحيحة تبدأ بـ https:// أو http:// أو /." }, 400);
     }
-    await env.DB.prepare("DELETE FROM project_images WHERE project_id = ? AND image_type IN ('video', 'tour')").bind(projectId).run();
+    // Replace video links only. Keep legacy external tour links and uploaded 360° panoramas intact.
+    await env.DB.prepare("DELETE FROM project_images WHERE project_id = ? AND image_type = 'video'").bind(projectId).run();
     for (let i = 0; i < videos.length; i++) {
       const value = String(videos[i]).trim();
       if (!value) continue;
       await env.DB.prepare(
         "INSERT INTO project_images (project_id, github_path, image_url, image_type, sort_order) VALUES (?, ?, ?, ?, ?)"
       ).bind(projectId, "external-video-" + projectId + "-" + i, value, "video", i).run();
-    }
-    for (let i = 0; i < tours.length; i++) {
-      const value = String(tours[i]).trim();
-      if (!value) continue;
-      await env.DB.prepare(
-        "INSERT INTO project_images (project_id, github_path, image_url, image_type, sort_order) VALUES (?, ?, ?, ?, ?)"
-      ).bind(projectId, "external-tour-" + projectId + "-" + i, value, "tour", i).run();
     }
     return json({ ok: true });
   }
@@ -292,7 +285,10 @@ async function handleApi(request, env) {
     }
     if (file.size > MAX_UPLOAD_BYTES) return json({ error: "حجم الصورة يتجاوز 20 ميجابايت. قلّل حجمها ثم أعد المحاولة." }, 413);
     const projectId = String(form.get("project_id") || "general").replace(/[^0-9]/g, "") || "general";
-    const imageType = String(form.get("image_type") || "image").slice(0, 30);
+    const requestedType = String(form.get("image_type") || "image");
+    const allowedTypes = ["image", "cover", "gallery", "tour360"];
+    if (!allowedTypes.includes(requestedType)) return json({ error: "نوع الصورة غير مسموح." }, 400);
+    const imageType = requestedType;
     const filename = Date.now() + "-" + safeFilename(file.name);
     const repoPath = "assets/uploads/" + projectId + "/" + filename;
     const bytes = new Uint8Array(await file.arrayBuffer());
