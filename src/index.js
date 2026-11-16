@@ -258,6 +258,31 @@ async function handleApi(request, env) {
     return json({ ok: true, images: remaining.results || [], cover_image: coverImage });
   }
 
+  const panoramaDeleteMatch = path.match(/^\/api\/projects\/(\d+)\/panoramas\/(\d+)$/);
+  if (panoramaDeleteMatch && method === "DELETE") {
+    const projectId = Number(panoramaDeleteMatch[1]), imageId = Number(panoramaDeleteMatch[2]);
+    const result = await env.DB.prepare("DELETE FROM project_images WHERE id = ? AND project_id = ? AND image_type = 'tour360'").bind(imageId, projectId).run();
+    if (!result.meta.changes) return json({ error: "مشهد 360° غير موجود." }, 404);
+    const remaining = await env.DB.prepare("SELECT id FROM project_images WHERE project_id = ? AND image_type = 'tour360' ORDER BY sort_order, id").bind(projectId).all();
+    for (let i = 0; i < (remaining.results || []).length; i++) {
+      await env.DB.prepare("UPDATE project_images SET sort_order = ? WHERE id = ? AND project_id = ?").bind(i, remaining.results[i].id, projectId).run();
+    }
+    return json({ ok: true });
+  }
+  const panoramaOrderMatch = path.match(/^\/api\/projects\/(\d+)\/panoramas\/reorder$/);
+  if (panoramaOrderMatch && method === "PUT") {
+    const projectId = Number(panoramaOrderMatch[1]);
+    const body = await request.json().catch(() => ({}));
+    const ids = Array.isArray(body.ids) ? body.ids.map(Number) : [];
+    const current = await env.DB.prepare("SELECT id FROM project_images WHERE project_id = ? AND image_type = 'tour360' ORDER BY sort_order, id").bind(projectId).all();
+    const valid = (current.results || []).map(x => Number(x.id));
+    if (ids.length !== valid.length || ids.some(id => !valid.includes(id)) || new Set(ids).size !== ids.length) return json({ error: "قائمة ترتيب المشاهد غير صالحة." }, 400);
+    for (let i = 0; i < ids.length; i++) {
+      await env.DB.prepare("UPDATE project_images SET sort_order = ? WHERE id = ? AND project_id = ? AND image_type = 'tour360'").bind(i, ids[i], projectId).run();
+    }
+    return json({ ok: true });
+  }
+
   const projectMediaMatch = path.match(/^\/api\/projects\/(\d+)\/media$/);
   if (projectMediaMatch && method === "GET") {
     const projectId = Number(projectMediaMatch[1]);
