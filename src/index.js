@@ -213,13 +213,59 @@ async function handleApi(request, env) {
     }
   }
 
+  const projectCoverMatch = path.match(/^\/api\/projects\/(\d+)\/cover$/);
+  if (projectCoverMatch && method === "PUT") {
+    const projectId = Number(projectCoverMatch[1]);
+    const body = await request.json().catch(() => ({}));
+    const image = await env.DB.prepare(
+      "SELECT id, image_url FROM project_images WHERE id = ? AND project_id = ? AND image_type IN ('cover', 'gallery', 'image')"
+    ).bind(Number(body.image_id), projectId).first();
+    if (!image) return json({ error: "الصورة المحددة غير موجودة ضمن صور هذا المشروع." }, 404);
+    await env.DB.prepare(
+      "UPDATE project_images SET image_type = CASE WHEN id = ? THEN 'cover' ELSE 'gallery' END WHERE project_id = ? AND image_type IN ('cover', 'gallery', 'image')"
+    ).bind(image.id, projectId).run();
+    await env.DB.prepare("UPDATE projects SET cover_image = ?, updated_at=CURRENT_TIMESTAMP WHERE id = ?")
+      .bind(image.image_url, projectId).run();
+    return json({ ok: true, cover_image: image.image_url });
+  }
+
+  const deleteProjectImageMatch = path.match(/^\/api\/projects\/(\d+)\/images\/(\d+)$/);
+  if (deleteProjectImageMatch && method === "DELETE") {
+    const projectId = Number(deleteProjectImageMatch[1]);
+    const imageId = Number(deleteProjectImageMatch[2]);
+    const image = await env.DB.prepare(
+      "SELECT id, image_url, image_type FROM project_images WHERE id = ? AND project_id = ? AND image_type IN ('cover', 'gallery', 'image')"
+    ).bind(imageId, projectId).first();
+    if (!image) return json({ error: "الصورة غير موجودة ضمن صور هذا المشروع." }, 404);
+    const project = await env.DB.prepare("SELECT cover_image FROM projects WHERE id = ?").bind(projectId).first();
+    await env.DB.prepare("DELETE FROM project_images WHERE id = ? AND project_id = ?").bind(imageId, projectId).run();
+    let coverImage = project ? project.cover_image : null;
+    if (coverImage === image.image_url) {
+      const next = await env.DB.prepare(
+        "SELECT image_url FROM project_images WHERE project_id = ? AND image_type IN ('cover', 'gallery', 'image') ORDER BY sort_order, id LIMIT 1"
+      ).bind(projectId).first();
+      coverImage = next ? next.image_url : null;
+      await env.DB.prepare("UPDATE projects SET cover_image = ?, updated_at=CURRENT_TIMESTAMP WHERE id = ?")
+        .bind(coverImage, projectId).run();
+      if (next) {
+        await env.DB.prepare("UPDATE project_images SET image_type='cover' WHERE project_id = ? AND id = ?")
+          .bind(projectId, (await env.DB.prepare("SELECT id FROM project_images WHERE project_id = ? AND image_url = ? ORDER BY id LIMIT 1").bind(projectId, next.image_url).first()).id).run();
+      }
+    }
+    const remaining = await env.DB.prepare(
+      "SELECT id, image_url, image_type, sort_order FROM project_images WHERE project_id = ? AND image_type IN ('cover', 'gallery', 'image') ORDER BY sort_order, id"
+    ).bind(projectId).all();
+    return json({ ok: true, images: remaining.results || [], cover_image: coverImage });
+  }
+
   const projectMediaMatch = path.match(/^\/api\/projects\/(\d+)\/media$/);
   if (projectMediaMatch && method === "GET") {
     const projectId = Number(projectMediaMatch[1]);
     const result = await env.DB.prepare(
-      "SELECT image_url, image_type, sort_order FROM project_images WHERE project_id = ? AND image_type IN ('video', 'tour', 'tour360') ORDER BY image_type, sort_order, id"
+      "SELECT id, image_url, image_type, sort_order FROM project_images WHERE project_id = ? ORDER BY image_type, sort_order, id"
     ).bind(projectId).all();
-    return json({ media: result.results || [] });
+    const project = await env.DB.prepare("SELECT cover_image FROM projects WHERE id = ?").bind(projectId).first();
+    return json({ media: result.results || [], cover_image: project ? project.cover_image : null });
   }
   if (projectMediaMatch && method === "PUT") {
     const projectId = Number(projectMediaMatch[1]);
@@ -305,15 +351,16 @@ async function handleApi(request, env) {
     });
     const rawUrl = "https://raw.githubusercontent.com/" + env.GITHUB_REPO + "/" + env.GITHUB_BRANCH + "/" + repoPath;
     if (projectId !== "general") {
-      await env.DB.prepare(
+      const inserted = await env.DB.prepare(
         "INSERT INTO project_images (project_id, github_path, image_url, image_type, sort_order) VALUES (?, ?, ?, ?, ?)"
       ).bind(Number(projectId), repoPath, rawUrl, imageType, 0).run();
+      var imageId = inserted.meta.last_row_id;
       if (String(form.get("is_cover") || "") === "true") {
         await env.DB.prepare("UPDATE projects SET cover_image=?, updated_at=CURRENT_TIMESTAMP WHERE id=?")
           .bind(rawUrl, Number(projectId)).run();
       }
     }
-    return json({ ok: true, path: repoPath, url: rawUrl, commit: uploaded.commit && uploaded.commit.sha }, 201);
+    return json({ ok: true, id: typeof imageId === "number" ? imageId : null, path: repoPath, url: rawUrl, commit: uploaded.commit && uploaded.commit.sha }, 201);
   }
 
   return json({ error: "المسار غير موجود." }, 404);
