@@ -213,6 +213,46 @@ async function handleApi(request, env) {
     }
   }
 
+  const projectMediaMatch = path.match(/^\/api\/projects\/(\d+)\/media$/);
+  if (projectMediaMatch && method === "GET") {
+    const projectId = Number(projectMediaMatch[1]);
+    const result = await env.DB.prepare(
+      "SELECT image_url, image_type, sort_order FROM project_images WHERE project_id = ? AND image_type IN ('video', 'tour') ORDER BY image_type, sort_order, id"
+    ).bind(projectId).all();
+    return json({ media: result.results || [] });
+  }
+  if (projectMediaMatch && method === "PUT") {
+    const projectId = Number(projectMediaMatch[1]);
+    const exists = await env.DB.prepare("SELECT id FROM projects WHERE id = ?").bind(projectId).first();
+    if (!exists) return json({ error: "المشروع غير موجود." }, 404);
+    const body = await request.json().catch(() => ({}));
+    const videos = Array.isArray(body.videos) ? body.videos : [];
+    const tours = Array.isArray(body.tours) ? body.tours : [];
+    const validUrl = value => {
+      const valueText = String(value || "").trim();
+      return valueText.startsWith("https://") || valueText.startsWith("http://") || valueText.startsWith("/");
+    };
+    if ([...videos, ...tours].some(value => !validUrl(value))) {
+      return json({ error: "يجب إدخال روابط صحيحة تبدأ بـ https:// أو http:// أو /." }, 400);
+    }
+    await env.DB.prepare("DELETE FROM project_images WHERE project_id = ? AND image_type IN ('video', 'tour')").bind(projectId).run();
+    for (let i = 0; i < videos.length; i++) {
+      const value = String(videos[i]).trim();
+      if (!value) continue;
+      await env.DB.prepare(
+        "INSERT INTO project_images (project_id, github_path, image_url, image_type, sort_order) VALUES (?, ?, ?, ?, ?)"
+      ).bind(projectId, "external-video-" + projectId + "-" + i, value, "video", i).run();
+    }
+    for (let i = 0; i < tours.length; i++) {
+      const value = String(tours[i]).trim();
+      if (!value) continue;
+      await env.DB.prepare(
+        "INSERT INTO project_images (project_id, github_path, image_url, image_type, sort_order) VALUES (?, ?, ?, ?, ?)"
+      ).bind(projectId, "external-tour-" + projectId + "-" + i, value, "tour", i).run();
+    }
+    return json({ ok: true });
+  }
+
   const projectMatch = path.match(/^\/api\/projects\/(\d+)$/);
   if (projectMatch && method === "PUT") {
     const id = Number(projectMatch[1]);
