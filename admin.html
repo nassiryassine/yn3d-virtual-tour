@@ -259,7 +259,6 @@ $('projectForm').addEventListener('submit',async e=>{
     }else if(selectedSavedCoverId!==null){
       await api('/projects/'+saved.id+'/cover',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({image_id:selectedSavedCoverId})});
     }
-    if(coverUrl){payload.cover_image=coverUrl;await api('/projects/'+saved.id,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});}
     for(const file of tourFiles){
       if(file.size>20*1024*1024) throw new Error('صورة الجولة '+file.name+' تتجاوز 20 ميجابايت.');
       const dimensions=await new Promise((resolve,reject)=>{
