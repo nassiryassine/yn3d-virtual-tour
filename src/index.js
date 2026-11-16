@@ -360,21 +360,39 @@ async function handleApi(request, env) {
     const allowedTypes = ["image", "cover", "gallery", "tour360"];
     if (!allowedTypes.includes(requestedType)) return json({ error: "نوع الصورة غير مسموح." }, 400);
     const imageType = requestedType;
-    const filename = Date.now() + "-" + safeFilename(file.name);
-    const repoPath = "assets/uploads/" + projectId + "/" + filename;
     const bytes = new Uint8Array(await file.arrayBuffer());
-    const encoded = encodeBase64(bytes);
+    const digest = new Uint8Array(await crypto.subtle.digest("SHA-256", bytes));
+    const hash = Array.from(digest).map(value => value.toString(16).padStart(2, "0")).join("");
+    const filename = hash.slice(0, 20) + "-" + safeFilename(file.name);
+    const repoPath = "assets/uploads/" + projectId + "/" + filename;
     const githubPath = "/" + repoPath.split("/").map(encodeURIComponent).join("/");
-    const uploaded = await githubRequest(env, "/contents" + githubPath, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        message: "Upload project image: " + filename,
-        content: encoded,
-        branch: env.GITHUB_BRANCH
-      })
-    });
-    const rawUrl = "https://raw.githubusercontent.com/" + env.GITHUB_REPO + "/" + env.GITHUB_BRANCH + "/" + repoPath;
+    if (projectId !== "general") {
+      const existing = await env.DB.prepare(
+        "SELECT id, image_url, github_path, image_type FROM project_images WHERE project_id = ? AND github_path = ? LIMIT 1"
+      ).bind(Number(projectId), repoPath).first();
+      if (existing) return json({ ok: true, id: existing.id, path: repoPath, url: existing.image_url, duplicate: true });
+    }
+    let uploaded = null;
+    let githubFile = null;
+    try {
+      githubFile = await githubRequest(env, "/contents" + githubPath + "?ref=" + encodeURIComponent(env.GITHUB_BRANCH));
+    } catch (error) {
+      if (!/not found|404/i.test(String(error.message || error))) throw error;
+    }
+    if (!githubFile) {
+      uploaded = await githubRequest(env, "/contents" + githubPath, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: "Upload project image: " + filename,
+          content: encodeBase64(bytes),
+          branch: env.GITHUB_BRANCH
+        })
+      });
+    }
+    const rawUrl = githubFile && githubFile.download_url
+      ? githubFile.download_url
+      : "https://raw.githubusercontent.com/" + env.GITHUB_REPO + "/" + env.GITHUB_BRANCH + "/" + repoPath;
     if (projectId !== "general") {
       const inserted = await env.DB.prepare(
         "INSERT INTO project_images (project_id, github_path, image_url, image_type, sort_order) VALUES (?, ?, ?, ?, ?)"
@@ -385,7 +403,7 @@ async function handleApi(request, env) {
           .bind(rawUrl, Number(projectId)).run();
       }
     }
-    return json({ ok: true, id: typeof imageId === "number" ? imageId : null, path: repoPath, url: rawUrl, commit: uploaded.commit && uploaded.commit.sha }, 201);
+    return json({ ok: true, id: typeof imageId === "number" ? imageId : null, path: repoPath, url: rawUrl, commit: uploaded && uploaded.commit && uploaded.commit.sha }, 201);
   }
 
   return json({ error: "المسار غير موجود." }, 404);
