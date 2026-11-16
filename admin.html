@@ -149,8 +149,8 @@ async function editProject(id) {
   clearMessage('projectMessage'); $('editorPanel').scrollIntoView({behavior:'smooth',block:'start'});
   try {
     const media = await api('/projects/'+id+'/media');
-    $('projectVideos').value=(media.media||[]).filter(x=>x.image_type==='video').map(x=>x.image_url).join('\\n');
-    $('projectTours').value=(media.media||[]).filter(x=>x.image_type==='tour').map(x=>x.image_url).join('\\n');
+    $('projectVideos').value=(media.media||[]).filter(x=>x.image_type==='video').map(x=>x.image_url).join('\n');
+    $('projectTours').value=(media.media||[]).filter(x=>x.image_type==='tour').map(x=>x.image_url).join('\n');
   } catch(err) { showMessage('projectMessage','تعذر تحميل روابط الفيديو والجولات: '+err.message); }
 }
 $('loginForm').addEventListener('submit',async e=>{
@@ -181,7 +181,7 @@ $('projectForm').addEventListener('submit',async e=>{
     let saved;
     if(id){await api('/projects/'+id,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});saved={id:Number(id)};}
     else saved=await api('/projects',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-    const mediaLines=id=>$(id).value.split(/\\r?\\n/).map(x=>x.trim()).filter(Boolean);
+    const mediaLines=id=>$(id).value.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
     await api('/projects/'+saved.id+'/media',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({videos:mediaLines('projectVideos'),tours:mediaLines('projectTours')})});
     const files=Array.from($('projectImages').files||[]);
     let coverUrl=null;
