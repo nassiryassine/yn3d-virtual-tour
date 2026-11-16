@@ -31,3 +31,27 @@ body.pano-viewer-open{overflow:hidden}
  .pano-lightbox .virtual-pano{height:calc(100vh - 180px);min-height:260px}
  .pano-lightbox .virtual-tour-toolbar{padding:10px}
 }
+
+
+/* Full-size project photo viewer; gallery thumbnails keep their existing crop */
+.gallery-item img[data-gallery-index]{cursor:zoom-in}
+.gallery-item img[data-gallery-index]:focus-visible{outline:2px solid var(--gold);outline-offset:-3px}
+.photo-lightbox{position:fixed;inset:0;z-index:11000;display:none;place-items:center;padding:2vh 2vw;background:rgba(0,0,0,.94);backdrop-filter:blur(8px)}
+.photo-lightbox.open{display:grid}
+.photo-lightbox-panel{width:min(1500px,98vw);height:min(96vh,1000px);display:flex;flex-direction:column;background:#080808;border:1px solid #51432f;box-shadow:0 25px 90px #000c}
+.photo-lightbox-header{height:54px;flex:0 0 54px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;border-bottom:1px solid #30291f;background:#151515;color:var(--gold);font-size:10px;letter-spacing:1.5px}
+.photo-lightbox-close{width:36px;height:36px;border:1px solid #51432f;background:#222;color:#fff;font-size:27px;line-height:1;cursor:pointer}
+.photo-lightbox-close:hover{background:var(--gold);color:#111}
+.photo-lightbox-stage{min-height:0;flex:1;display:grid;grid-template-columns:64px minmax(0,1fr) 64px;align-items:center;justify-items:center;gap:10px;padding:14px}
+.photo-lightbox-stage img{display:block;width:auto;height:auto;max-width:100%;max-height:100%;object-fit:contain;object-position:center}
+.photo-lightbox-nav{width:48px;height:64px;border:1px solid #51432f;background:#1b1b1b;color:#fff;font-size:42px;line-height:1;cursor:pointer}
+.photo-lightbox-nav:hover:not(:disabled){background:var(--gold);color:#111}
+.photo-lightbox-nav:disabled{opacity:.35;cursor:default}
+body.photo-viewer-open{overflow:hidden}
+@media(max-width:650px){
+ .photo-lightbox{padding:0}
+ .photo-lightbox-panel{width:100%;height:100dvh;max-height:100dvh;border:0}
+ .photo-lightbox-stage{grid-template-columns:42px minmax(0,1fr) 42px;gap:4px;padding:8px}
+ .photo-lightbox-nav{width:38px;height:54px;font-size:34px}
+ .photo-lightbox-stage img{max-width:100%;max-height:100%}
+}
