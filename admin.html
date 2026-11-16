@@ -88,7 +88,12 @@
 const $ = id => document.getElementById(id);
 let projects = [];
 let categories = [];
-let busy = false;\nlet savedImages = [];\nlet currentCoverImage = null;\nlet selectedSavedCoverId = null;\nlet selectedNewCoverIndex = null;\nlet previewUrls = [];
+let busy = false;
+let savedImages = [];
+let currentCoverImage = null;
+let selectedSavedCoverId = null;
+let selectedNewCoverIndex = null;
+let previewUrls = [];
 
 function showMessage(id, message, type='error') {
   const el = $(id); el.textContent = message; el.className = 'message ' + type;
