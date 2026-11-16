@@ -51,9 +51,9 @@
   const closeButton=document.getElementById('panoee-close');
   if(!modal||!frame||!openButton||!panel)return;
   const panoeeOrigin='https://tour.panoee.net';
-  let motionStarted=false;
+  let motionStarted=false,frameReady=false;
   const relayMotion=event=>{
-   if(!motionStarted||!frame.contentWindow)return;
+   if(!motionStarted||!frameReady||!frame.contentWindow)return;
    const vector=value=>value?{x:Number.isFinite(value.x)?value.x:null,y:Number.isFinite(value.y)?value.y:null,z:Number.isFinite(value.z)?value.z:null}:null;
    const rotation=value=>value?{alpha:Number.isFinite(value.alpha)?value.alpha:null,beta:Number.isFinite(value.beta)?value.beta:null,gamma:Number.isFinite(value.gamma)?value.gamma:null}:null;
    try{
@@ -113,7 +113,7 @@
   closeButton.addEventListener('click',close);
   modal.addEventListener('click',event=>{if(event.target===modal)close();});
   document.addEventListener('keydown',event=>{if(event.key==='Escape'&&modal.classList.contains('open'))close();});
-  frame.addEventListener('load',()=>{if(motionStarted)console.info('Panoee iframe ready for motion events.');});
+  frame.addEventListener('load',()=>{frameReady=true;});
  }
  function setupVirtualTour(items){
   const lightbox=document.getElementById('pano-lightbox'),pano=document.getElementById('virtual-pano'),list=document.getElementById('pano-scenes');
