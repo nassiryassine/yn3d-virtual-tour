@@ -68,8 +68,8 @@
   document.addEventListener('keydown',event=>{
    if(!lightbox.classList.contains('open'))return;
    if(event.key==='Escape')close();
-   else if(event.key==='ArrowLeft'){event.preventDefault();show(currentIndex+1);}
-   else if(event.key==='ArrowRight'){event.preventDefault();show(currentIndex-1);}
+   else if(event.key==='ArrowLeft'){event.preventDefault();show(currentIndex-1);}
+   else if(event.key==='ArrowRight'){event.preventDefault();show(currentIndex+1);}
   });
  }
  function setupVirtualTour(items){
