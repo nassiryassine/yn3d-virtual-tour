@@ -143,6 +143,27 @@ async function handleApi(request, env) {
     });
   }
 
+  // Public portfolio endpoints: only published projects are exposed.
+  if (path === "/api/public/projects" && method === "GET") {
+    const result = await env.DB.prepare(
+      "SELECT p.id, p.title, p.slug, p.description, p.location, p.cover_image, p.status, p.sort_order, c.name AS category_name FROM projects p LEFT JOIN categories c ON c.id = p.category_id WHERE p.status = 'published' ORDER BY p.sort_order, p.id DESC"
+    ).all();
+    return json({ projects: result.results || [] });
+  }
+
+  const publicProjectMatch = path.match(/^\/api\/public\/projects\/([^/]+)$/);
+  if (publicProjectMatch && method === "GET") {
+    const slug = decodeURIComponent(publicProjectMatch[1]);
+    const project = await env.DB.prepare(
+      "SELECT p.id, p.title, p.slug, p.description, p.location, p.cover_image, p.status, c.name AS category_name FROM projects p LEFT JOIN categories c ON c.id = p.category_id WHERE p.slug = ? AND p.status = 'published' LIMIT 1"
+    ).bind(slug).first();
+    if (!project) return json({ error: "المشروع غير موجود أو غير منشور." }, 404);
+    const media = await env.DB.prepare(
+      "SELECT id, image_url, image_type, sort_order FROM project_images WHERE project_id = ? ORDER BY sort_order, id"
+    ).bind(project.id).all();
+    return json({ project, media: media.results || [] });
+  }
+
   if (!(await isAuthenticated(request, env))) return json({ error: "يرجى تسجيل الدخول أولاً." }, 401);
   if (path === "/api/me" && method === "GET") return json({ ok: true });
 
