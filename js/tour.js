@@ -1,5 +1,4 @@
 (() => {
-  const input = document.getElementById('pano-upload');
   const list = document.getElementById('scene-list');
   const counter = document.getElementById('scene-counter');
   const pano = document.getElementById('pano');
@@ -7,7 +6,6 @@
   const scenes = [];
   let viewer = null;
   let current = null;
-  const objectUrls = [];
 
   // The route map is intentionally schematic: it represents the order of
   // the four viewpoints, not the hospital's surveyed floor plan.
@@ -135,22 +133,6 @@
     else counter.textContent = 'NO SCENES FOUND';
   }
 
-  input.addEventListener('change', async event => {
-    const files = Array.from(event.target.files || []);
-    for (const file of files) {
-      const url = URL.createObjectURL(file);
-      objectUrls.push(url);
-      const name = file.name.replace(/\.[^.]+$/, '');
-      const ok = await addSceneFromUrl(url, name, true);
-      if (!ok) alert(`${file.name}: use a 2:1 equirectangular panorama (for example 6000 × 3000).`);
-    }
-    connectAdjacentScenes();
-    renderList();
-    renderMap();
-    if (scenes.length && !current) activate(scenes[0]);
-    input.value = '';
-  });
-
   document.getElementById('zoom-in').addEventListener('click', () => {
     if (current) current.scene.view().setFov(Math.max(25 * Math.PI / 180, current.scene.view().fov() - 8 * Math.PI / 180));
   });
@@ -163,7 +145,6 @@
   document.getElementById('fullscreen').addEventListener('click', () => {
     if (pano.requestFullscreen) pano.requestFullscreen();
   });
-  window.addEventListener('beforeunload', () => objectUrls.forEach(URL.revokeObjectURL));
 
   renderMap();
   loadSavedPanoramas();
