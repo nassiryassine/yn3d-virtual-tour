@@ -51,6 +51,8 @@
               <div class="field"><label for="projectStatus">حالة المشروع</label><select id="projectStatus"><option value="draft">مسودة</option><option value="published">منشور</option></select></div>
               <div class="field"><label for="projectOrder">ترتيب العرض</label><input id="projectOrder" type="number" value="0"></div>
               <div class="field full"><label for="projectImages">صور المشروع</label><input id="projectImages" type="file" accept="image/jpeg,image/png,image/webp" multiple><div class="hint">JPG أو PNG أو WEBP، بحد أقصى 20 ميجابايت للصورة. يجب حفظ المشروع أولاً ثم تُرفع الصور إلى مستودع GitHub.</div></div>
+              <div class="field full"><label for="projectVideos">روابط فيديوهات المشروع</label><textarea id="projectVideos" placeholder="ضع رابط كل فيديو في سطر مستقل (YouTube أو Vimeo أو MP4)"></textarea><div class="hint">يمكن إضافة أكثر من فيديو، رابط واحد في كل سطر.</div></div>
+              <div class="field full"><label for="projectTours">روابط الجولات الافتراضية 360°</label><textarea id="projectTours" placeholder="ضع رابط كل جولة افتراضية في سطر مستقل"></textarea><div class="hint">خصص هذا القسم لروابط جولات المشروع التفاعلية.</div></div>
             </div>
             <div id="projectMessage" class="message"></div>
             <div class="form-actions"><button class="btn primary" id="saveProjectButton" type="submit">حفظ المشروع</button><button class="btn" type="button" id="cancelEditButton">إلغاء</button></div>
@@ -134,16 +136,22 @@ function renderProjects() {
   }).join('');
 }
 function resetForm() {
-  $('projectForm').reset(); $('projectId').value=''; $('projectOrder').value='0'; $('editorTitle').textContent='إضافة مشروع جديد'; $('saveProjectButton').textContent='حفظ المشروع'; renderCategoryOptions(); clearMessage('projectMessage');
+  $('projectForm').reset(); $('projectId').value=''; $('projectOrder').value='0'; $('editorTitle').textContent='إضافة مشروع جديد'; $('saveProjectButton').textContent='حفظ المشروع'; $('projectVideos').value=''; $('projectTours').value=''; renderCategoryOptions(); clearMessage('projectMessage');
 }
-function editProject(id) {
+async function editProject(id) {
   const p=projects.find(x=>Number(x.id)===Number(id)); if(!p)return;
   $('projectId').value=p.id; $('projectTitle').value=p.title||''; $('projectSlug').value=p.slug||'';
   $('projectLocation').value=p.location||''; $('projectDescription').value=p.description||'';
   $('projectStatus').value=p.status||'draft'; $('projectOrder').value=p.sort_order||0;
   renderCategoryOptions(p.category_id); $('projectImages').value='';
+  $('projectVideos').value=''; $('projectTours').value='';
   $('editorTitle').textContent='تعديل المشروع'; $('saveProjectButton').textContent='حفظ التعديلات';
   clearMessage('projectMessage'); $('editorPanel').scrollIntoView({behavior:'smooth',block:'start'});
+  try {
+    const media = await api('/projects/'+id+'/media');
+    $('projectVideos').value=(media.media||[]).filter(x=>x.image_type==='video').map(x=>x.image_url).join('\\n');
+    $('projectTours').value=(media.media||[]).filter(x=>x.image_type==='tour').map(x=>x.image_url).join('\\n');
+  } catch(err) { showMessage('projectMessage','تعذر تحميل روابط الفيديو والجولات: '+err.message); }
 }
 $('loginForm').addEventListener('submit',async e=>{
   e.preventDefault(); clearMessage('loginMessage'); setBusy(true,'loginButton');
@@ -173,6 +181,8 @@ $('projectForm').addEventListener('submit',async e=>{
     let saved;
     if(id){await api('/projects/'+id,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});saved={id:Number(id)};}
     else saved=await api('/projects',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    const mediaLines=id=>$(id).value.split(/\\r?\\n/).map(x=>x.trim()).filter(Boolean);
+    await api('/projects/'+saved.id+'/media',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({videos:mediaLines('projectVideos'),tours:mediaLines('projectTours')})});
     const files=Array.from($('projectImages').files||[]);
     let coverUrl=null;
     for(let i=0;i<files.length;i++){
