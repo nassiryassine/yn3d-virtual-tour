@@ -39,7 +39,9 @@
    viewer=new Marzipano.Viewer(pano,{controls:{mouseViewMode:'drag'}});
    const loaded=await Promise.all(items.map((item,index)=>new Promise(resolve=>{
     const image=new Image();
+    const timeout=setTimeout(()=>resolve(null),30000);
     image.onload=()=>{
+     clearTimeout(timeout);
      const width=image.naturalWidth,height=image.naturalHeight;
      if(!height||Math.abs(width/height-2)>0.04){resolve(null);return;}
      const geometry=new Marzipano.EquirectGeometry([{width}]);
@@ -48,10 +50,11 @@
      const view=new Marzipano.RectilinearView({yaw:0,pitch:0,fov:Math.PI/2},limiter);
      resolve({index,name:'Viewpoint '+(index+1),scene:viewer.createScene({source,geometry,view})});
     };
-    image.onerror=()=>resolve(null);image.src=item.image_url;
+    image.onerror=()=>{clearTimeout(timeout);resolve(null);};
+    image.src=item.image_url;
    })));
    scenes=loaded.filter(Boolean);
-   if(!scenes.length){pano.innerHTML='<div class="pano-loading">No valid 360° panorama could be loaded. Check that uploaded images are 2:1 equirectangular panoramas.</div>';return;}
+   if(!scenes.length){pano.innerHTML='<div class="pano-loading">تعذر تحميل صور 360°. قد يكون رابط الصورة غير متاح أو حجمها كبيراً أو أبعادها ليست بنسبة 2:1. تحقق من اتصال الصور ثم أعد المحاولة.</div>';return;}
    list.innerHTML='';
    scenes.forEach(item=>{
     const btn=document.createElement('button');btn.type='button';btn.className='pano-scene-button';btn.textContent='VIEWPOINT '+String(item.index+1).padStart(2,'0');btn.addEventListener('click',()=>activate(item));list.appendChild(btn);
