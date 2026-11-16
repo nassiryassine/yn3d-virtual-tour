@@ -16,15 +16,62 @@
   const photos=media.filter(m=>['cover','gallery','image'].includes(String(m.image_type||'').toLowerCase()));
   const videos=media.filter(m=>String(m.image_type||'').toLowerCase()==='video');
   const panoramas=media.filter(m=>String(m.image_type||'').toLowerCase()==='tour360').sort((a,b)=>(a.sort_order||0)-(b.sort_order||0)||a.id-b.id);
-  const gallery=photos.length?photos.map((m,i)=>'<figure class="gallery-item"><img src="'+esc(m.image_url)+'" alt="'+esc(p.title)+' — image '+(i+1)+'" loading="lazy"></figure>').join(''):'<div class="media-empty">Project photos will appear here once they are added from the administration panel.</div>';
+  const gallery=photos.length?photos.map((m,i)=>'<figure class="gallery-item"><img src="'+esc(m.image_url)+'" alt="'+esc(p.title)+' — image '+(i+1)+'" data-gallery-index="'+i+'" role="button" tabindex="0" aria-label="View full image '+(i+1)+' of '+photos.length+'" loading="lazy"></figure>').join(''):'<div class="media-empty">Project photos will appear here once they are added from the administration panel.</div>';
   const videoSection=videos.length?videos.map(v=>videoMarkup(v.image_url)).join(''):'<div class="media-empty">Project videos will appear here when video links are added.</div>';
   const tourSection=panoramas.length
    ? '<div class="panorama-gallery" id="panorama-gallery">'+panoramas.map((item,index)=>'<button class="panorama-thumb" type="button" data-pano-index="'+index+'" aria-label="Open 360 panorama '+(index+1)+'"><img src="'+esc(item.image_url)+'" alt="360° panorama '+(index+1)+'" loading="lazy"><span class="panorama-thumb-overlay"><strong>360°</strong><span>VIEW PANORAMA '+String(index+1).padStart(2,'0')+'</span></span></button>').join('')+'</div><div class="pano-lightbox" id="pano-lightbox" aria-hidden="true"><div class="pano-lightbox-panel" role="dialog" aria-modal="true" aria-label="Interactive 360 degree panorama"><div class="pano-lightbox-header"><span id="pano-view-title">360° VIRTUAL EXPERIENCE</span><button id="pano-close" class="pano-close" type="button" aria-label="Close viewer">×</button></div><div id="virtual-pano" class="virtual-pano"><div class="pano-loading">Loading 360° experience…</div></div><div class="virtual-tour-toolbar"><div id="pano-scenes" class="pano-scenes" aria-label="Tour viewpoints"></div><div class="pano-controls"><button id="pano-zoom-out" type="button" aria-label="Zoom out">−</button><button id="pano-zoom-in" type="button" aria-label="Zoom in">＋</button><button id="pano-reset" type="button" aria-label="Reset view">◎</button><button id="pano-fullscreen" type="button" aria-label="Fullscreen">⛶</button></div></div></div></div>'
    : '<div class="media-empty">An interactive 360° tour will appear here when panorama scenes are uploaded from the administration panel.</div>';
-  root.innerHTML='<section class="project-hero"><p class="eyebrow">'+esc(p.category_name||'YN 3D PROJECT')+'</p><h1>'+esc(p.title)+'</h1><p class="project-description">'+esc(p.description||'Architectural visualization by YN 3D.')+'</p>'+(p.location?'<div class="project-location">'+esc(p.location)+'</div>':'')+'<a class="project-back" href="index.html#work">← BACK TO ALL PROJECTS</a></section><section class="project-section"><div class="project-section-heading"><h2>PROJECT <em>GALLERY</em></h2><span>01 / IMAGES</span></div><div class="gallery-grid">'+gallery+'</div></section><section class="project-section"><div class="project-section-heading"><h2>PROJECT <em>VIDEOS</em></h2><span>02 / MOTION</span></div><div class="video-grid">'+videoSection+'</div></section><section class="project-section"><div class="project-section-heading"><h2>VIRTUAL <em>EXPERIENCE</em></h2><span>03 / 360° TOURS</span></div><div class="tour-grid">'+tourSection+'</div></section>';
+  root.innerHTML='<section class="project-hero"><p class="eyebrow">'+esc(p.category_name||'YN 3D PROJECT')+'</p><h1>'+esc(p.title)+'</h1><p class="project-description">'+esc(p.description||'Architectural visualization by YN 3D.')+'</p>'+(p.location?'<div class="project-location">'+esc(p.location)+'</div>':'')+'<a class="project-back" href="index.html#work">← BACK TO ALL PROJECTS</a></section><section class="project-section"><div class="project-section-heading"><h2>PROJECT <em>GALLERY</em></h2><span>01 / IMAGES</span></div><div class="gallery-grid">'+gallery+'</div><div class="photo-lightbox" id="photo-lightbox" aria-hidden="true"><div class="photo-lightbox-panel" role="dialog" aria-modal="true" aria-label="Project image viewer"><div class="photo-lightbox-header"><span id="photo-lightbox-count"></span><button id="photo-lightbox-close" class="photo-lightbox-close" type="button" aria-label="Close image viewer">×</button></div><div class="photo-lightbox-stage"><button id="photo-lightbox-prev" class="photo-lightbox-nav" type="button" aria-label="Previous image">‹</button><img id="photo-lightbox-image" alt=""><button id="photo-lightbox-next" class="photo-lightbox-nav" type="button" aria-label="Next image">›</button></div></div></div></section><section class="project-section"><div class="project-section-heading"><h2>PROJECT <em>VIDEOS</em></h2><span>02 / MOTION</span></div><div class="video-grid">'+videoSection+'</div></section><section class="project-section"><div class="project-section-heading"><h2>VIRTUAL <em>EXPERIENCE</em></h2><span>03 / 360° TOURS</span></div><div class="tour-grid">'+tourSection+'</div></section>';
   document.title=p.title+' | YN 3D';
+  if(photos.length) setupPhotoGallery(photos,p.title);
   if(panoramas.length) setupVirtualTour(panoramas);
  }catch(error){root.innerHTML='<div class="project-loading">'+esc(error.message)+'<p><a href="index.html">Back to portfolio</a></p></div>';}
+ function setupPhotoGallery(items,title){
+  const lightbox=document.getElementById('photo-lightbox');
+  const image=document.getElementById('photo-lightbox-image');
+  const count=document.getElementById('photo-lightbox-count');
+  const previous=document.getElementById('photo-lightbox-prev');
+  const next=document.getElementById('photo-lightbox-next');
+  let currentIndex=0,lastFocused=null;
+  const show=index=>{
+   currentIndex=(index+items.length)%items.length;
+   const item=items[currentIndex];
+   image.src=item.image_url;
+   image.alt=title+' — image '+(currentIndex+1);
+   count.textContent=String(currentIndex+1).padStart(2,'0')+' / '+String(items.length).padStart(2,'0');
+   previous.disabled=items.length<2;next.disabled=items.length<2;
+  };
+  const open=index=>{
+   lastFocused=document.activeElement;
+   show(index);
+   lightbox.classList.add('open');lightbox.setAttribute('aria-hidden','false');
+   document.body.classList.add('photo-viewer-open');
+   document.getElementById('photo-lightbox-close').focus();
+  };
+  const close=()=>{
+   lightbox.classList.remove('open');lightbox.setAttribute('aria-hidden','true');
+   document.body.classList.remove('photo-viewer-open');
+   image.removeAttribute('src');
+   if(lastFocused&&lastFocused.focus)lastFocused.focus();
+  };
+  document.querySelector('.gallery-grid').addEventListener('click',event=>{
+   const target=event.target.closest('[data-gallery-index]');if(target)open(Number(target.dataset.galleryIndex));
+  });
+  document.querySelector('.gallery-grid').addEventListener('keydown',event=>{
+   const target=event.target.closest('[data-gallery-index]');
+   if(target&&(event.key==='Enter'||event.key===' ')){event.preventDefault();open(Number(target.dataset.galleryIndex));}
+  });
+  previous.addEventListener('click',()=>show(currentIndex-1));
+  next.addEventListener('click',()=>show(currentIndex+1));
+  document.getElementById('photo-lightbox-close').addEventListener('click',close);
+  lightbox.addEventListener('click',event=>{if(event.target===lightbox)close();});
+  document.addEventListener('keydown',event=>{
+   if(!lightbox.classList.contains('open'))return;
+   if(event.key==='Escape')close();
+   else if(event.key==='ArrowLeft'){event.preventDefault();show(currentIndex+1);}
+   else if(event.key==='ArrowRight'){event.preventDefault();show(currentIndex-1);}
+  });
+ }
  function setupVirtualTour(items){
   const lightbox=document.getElementById('pano-lightbox'),pano=document.getElementById('virtual-pano'),list=document.getElementById('pano-scenes');
   let viewer=null,scenes=[],active=null,initPromise=null;
