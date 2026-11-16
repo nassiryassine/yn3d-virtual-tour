@@ -3,5 +3,5 @@
 /* Dynamic portfolio cards */
 .project-dynamic-image img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .6s ease}
 .project-dynamic-image:hover img{transform:scale(1.035)}
-.project-fallback-image{position:absolute;inset:0;background:linear-gradient(135deg,#373027,#171615 65%,#6a5639)}
+.project-fallback-image{position:absolute;inset:0;background:linear-gradient(0deg,rgba(0,0,0,.35),transparent 55%),url('https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1800&q=85') center/cover}
 .projects-loading{grid-column:1/-1;padding:35px;border:1px dashed var(--line);color:var(--muted);text-align:center;font-size:13px}
