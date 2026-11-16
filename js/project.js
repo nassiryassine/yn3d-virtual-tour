@@ -25,36 +25,40 @@
   document.title=p.title+' | YN 3D';
   if(panoramas.length) initVirtualTour(panoramas);
  }catch(error){root.innerHTML='<div class="project-loading">'+esc(error.message)+'<p><a href="index.html">Back to portfolio</a></p></div>';}
- function initVirtualTour(items){
+ async function initVirtualTour(items){
   const pano=document.getElementById('virtual-pano'),list=document.getElementById('pano-scenes');
   if(!window.Marzipano){pano.innerHTML='<div class="pano-loading">The 360° viewer could not load. Please refresh the page.</div>';return;}
-  const viewer=new Marzipano.Viewer(pano,{controls:{mouseViewMode:'drag'}}),scenes=[];
-  let active=null;
-  const activate=item=>{active=item;item.scene.switchTo({transitionDuration:500});renderList();};
+  const viewer=new Marzipano.Viewer(pano,{controls:{mouseViewMode:'drag'}});
+  let scenes=[],active=null;
   const renderList=()=>{
    list.innerHTML='';
    scenes.forEach((item,index)=>{
     const btn=document.createElement('button');btn.type='button';btn.className='pano-scene-button'+(item===active?' active':'');btn.textContent='VIEWPOINT '+String(index+1).padStart(2,'0');btn.addEventListener('click',()=>activate(item));list.appendChild(btn);
    });
   };
-  items.forEach((item,index)=>{
+  const activate=item=>{if(!item)return;active=item;item.scene.switchTo({transitionDuration:500});renderList();};
+  const loaded=await Promise.all(items.map((item,index)=>new Promise(resolve=>{
    const image=new Image();
    image.onload=()=>{
-    const width=image.naturalWidth,geometry=new Marzipano.EquirectGeometry([{width}]);
+    const width=image.naturalWidth,height=image.naturalHeight;
+    if(!height||Math.abs(width/height-2)>0.04){resolve(null);return;}
+    const geometry=new Marzipano.EquirectGeometry([{width}]);
     const source=Marzipano.ImageUrlSource.fromString(item.image_url);
     const limiter=Marzipano.RectilinearView.limit.traditional(width,120*Math.PI/180);
     const view=new Marzipano.RectilinearView({yaw:0,pitch:0,fov:Math.PI/2},limiter);
-    const scene=viewer.createScene({source,geometry,view});
-    scenes[index]={name:'Viewpoint '+(index+1),scene};
-    if(scenes.filter(Boolean).length===items.length){scenes.forEach((entry,i)=>{
-      const container=entry.scene.hotspotContainer();
-      if(i<scenes.length-1){const next=scenes[i+1],el=document.createElement('button');el.className='tour-hotspot';el.type='button';el.textContent='➜';el.title='Next viewpoint';el.addEventListener('click',()=>activate(next));container.createHotspot(el,{yaw:0,pitch:-0.12});}
-      if(i>0){const previous=scenes[i-1],el=document.createElement('button');el.className='tour-hotspot';el.type='button';el.textContent='←';el.title='Previous viewpoint';el.addEventListener('click',()=>activate(previous));container.createHotspot(el,{yaw:Math.PI,pitch:-0.12});}
-    });activate(scenes[0]);}
+    resolve({name:'Viewpoint '+(index+1),scene:viewer.createScene({source,geometry,view})});
    };
-   image.onerror=()=>{pano.innerHTML='<div class="pano-loading">A panorama image could not be loaded.</div>';};
+   image.onerror=()=>resolve(null);
    image.src=item.image_url;
+  })));
+  scenes=loaded.filter(Boolean);
+  if(!scenes.length){pano.innerHTML='<div class="pano-loading">No valid 360° panorama could be loaded. Check that uploaded images are 2:1 equirectangular panoramas.</div>';return;}
+  scenes.forEach((item,index)=>{
+   const container=item.scene.hotspotContainer();
+   if(index<scenes.length-1){const next=scenes[index+1],el=document.createElement('button');el.className='tour-hotspot';el.type='button';el.textContent='➜';el.title='Next viewpoint';el.addEventListener('click',()=>activate(next));container.createHotspot(el,{yaw:0,pitch:-0.12});}
+   if(index>0){const previous=scenes[index-1],el=document.createElement('button');el.className='tour-hotspot';el.type='button';el.textContent='←';el.title='Previous viewpoint';el.addEventListener('click',()=>activate(previous));container.createHotspot(el,{yaw:Math.PI,pitch:-0.12});}
   });
+  activate(scenes[0]);
   document.getElementById('pano-zoom-in').addEventListener('click',()=>{if(active)active.scene.view().setFov(Math.max(25*Math.PI/180,active.scene.view().fov()-8*Math.PI/180));});
   document.getElementById('pano-zoom-out').addEventListener('click',()=>{if(active)active.scene.view().setFov(Math.min(110*Math.PI/180,active.scene.view().fov()+8*Math.PI/180));});
   document.getElementById('pano-reset').addEventListener('click',()=>{if(active)active.scene.lookTo({yaw:0,pitch:0,fov:Math.PI/2},{transitionDuration:450});});
