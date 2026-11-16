@@ -240,16 +240,16 @@ async function handleApi(request, env) {
     const project = await env.DB.prepare("SELECT cover_image FROM projects WHERE id = ?").bind(projectId).first();
     await env.DB.prepare("DELETE FROM project_images WHERE id = ? AND project_id = ?").bind(imageId, projectId).run();
     let coverImage = project ? project.cover_image : null;
-    if (coverImage === image.image_url) {
+    if (coverImage === image.image_url || image.image_type === "cover") {
       const next = await env.DB.prepare(
-        "SELECT image_url FROM project_images WHERE project_id = ? AND image_type IN ('cover', 'gallery', 'image') ORDER BY sort_order, id LIMIT 1"
+        "SELECT id, image_url FROM project_images WHERE project_id = ? AND image_type IN ('cover', 'gallery', 'image') ORDER BY sort_order, id LIMIT 1"
       ).bind(projectId).first();
       coverImage = next ? next.image_url : null;
       await env.DB.prepare("UPDATE projects SET cover_image = ?, updated_at=CURRENT_TIMESTAMP WHERE id = ?")
         .bind(coverImage, projectId).run();
       if (next) {
         await env.DB.prepare("UPDATE project_images SET image_type='cover' WHERE project_id = ? AND id = ?")
-          .bind(projectId, (await env.DB.prepare("SELECT id FROM project_images WHERE project_id = ? AND image_url = ? ORDER BY id LIMIT 1").bind(projectId, next.image_url).first()).id).run();
+          .bind(projectId, next.id).run();
       }
     }
     const remaining = await env.DB.prepare(
