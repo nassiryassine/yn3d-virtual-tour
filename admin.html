@@ -9,7 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Tajawal:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{color-scheme:dark;--bg:#101010;--panel:#191919;--panel2:#202020;--line:#303030;--text:#f3f0e9;--muted:#aaa49a;--gold:#c6a46a;--red:#d96b64;--green:#72b58b}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Tajawal, sans-serif;min-height:100vh}button,input,textarea,select{font:inherit}button{cursor:pointer}.shell{max-width:1180px;margin:auto;padding:30px 22px}.top{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:22px;margin-bottom:30px}.brand{display:flex;align-items:center;gap:12px}.mark{font:700 32px 'DM Sans';letter-spacing:-2px}.mark b{color:var(--gold)}.brand small{color:var(--muted);font:600 10px 'DM Sans';letter-spacing:1.5px;direction:ltr;text-align:left}.top-actions{display:flex;gap:10px;align-items:center}.btn{border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:10px 16px;border-radius:8px;font-weight:700}.btn.primary{background:var(--gold);border-color:var(--gold);color:#17130d}.btn.danger{color:#ffaaa4;border-color:#663b38}.btn:disabled{opacity:.5;cursor:wait}.muted{color:var(--muted)}.login-wrap{max-width:430px;margin:9vh auto;padding:32px;background:var(--panel);border:1px solid var(--line);border-radius:16px}.login-wrap h1{margin:0 0 8px;font-size:27px}.login-wrap p{color:var(--muted);margin:0 0 24px}.field{display:flex;flex-direction:column;gap:7px;margin-bottom:15px}.field label{font-weight:700;font-size:14px}.field input,.field textarea,.field select{width:100%;background:#111;border:1px solid var(--line);border-radius:8px;padding:12px;color:var(--text);outline:none}.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--gold)}.field textarea{min-height:105px;resize:vertical}.message{padding:11px 13px;border-radius:8px;margin:12px 0;display:none}.message.error{display:block;background:#3a201f;color:#ffb9b2}.message.success{display:block;background:#1d3427;color:#a6e0b8}.dashboard{display:none}.welcome{display:flex;justify-content:space-between;align-items:end;margin-bottom:24px}.welcome h1{font-size:29px;margin:0 0 5px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px}.stat,.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px}.stat{padding:18px}.stat span{color:var(--muted);font-size:13px}.stat strong{display:block;font:700 28px 'DM Sans';margin-top:7px}.layout{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(300px,.75fr);gap:18px}.panel{padding:20px;margin-bottom:18px}.panel h2{font-size:20px;margin:0 0 17px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 13px}.full{grid-column:1/-1}.form-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:5px}.project-list{display:flex;flex-direction:column;gap:10px}.project{display:flex;gap:13px;padding:12px;background:#141414;border:1px solid var(--line);border-radius:9px;align-items:center}.thumb{width:78px;height:66px;flex:0 0 78px;border-radius:6px;background:#292929;object-fit:cover}.project-info{min-width:0;flex:1}.project-info strong{display:block;font-size:16px;overflow-wrap:anywhere}.project-info small{color:var(--muted)}.project-actions{display:flex;gap:6px;flex-wrap:wrap}.project-actions .btn{padding:7px 10px;font-size:12px}.empty{padding:25px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:9px}.hint{font-size:12px;color:var(--muted);line-height:1.7;margin-top:5px}.status{display:inline-block;border-radius:30px;padding:3px 9px;font-size:11px;margin-top:5px}.status.published{background:#1c3929;color:#9ad9ad}.status.draft{background:#383126;color:#d8bd8a}.hidden{display:none!important}@media(max-width:800px){.layout{grid-template-columns:1fr}.stats{gap:8px}.stat{padding:13px}.shell{padding:18px 13px}.welcome{align-items:start;gap:12px;flex-direction:column}}@media(max-width:520px){.form-grid{grid-template-columns:1fr}.full{grid-column:auto}.top{align-items:flex-start}.top-actions{flex-direction:column;align-items:stretch}.project{align-items:flex-start;flex-wrap:wrap}.project-actions{width:100%;padding-right:90px}.stats{grid-template-columns:1fr 1fr}.stat:last-child{grid-column:1/-1}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Tajawal, sans-serif;min-height:100vh}button,input,textarea,select{font:inherit}button{cursor:pointer}.shell{max-width:1180px;margin:auto;padding:30px 22px}.top{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:22px;margin-bottom:30px}.brand{display:flex;align-items:center;gap:12px}.mark{font:700 32px 'DM Sans';letter-spacing:-2px}.mark b{color:var(--gold)}.brand small{color:var(--muted);font:600 10px 'DM Sans';letter-spacing:1.5px;direction:ltr;text-align:left}.top-actions{display:flex;gap:10px;align-items:center}.btn{border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:10px 16px;border-radius:8px;font-weight:700}.btn.primary{background:var(--gold);border-color:var(--gold);color:#17130d}.btn.danger{color:#ffaaa4;border-color:#663b38}.btn:disabled{opacity:.5;cursor:wait}.muted{color:var(--muted)}.login-wrap{max-width:430px;margin:9vh auto;padding:32px;background:var(--panel);border:1px solid var(--line);border-radius:16px}.login-wrap h1{margin:0 0 8px;font-size:27px}.login-wrap p{color:var(--muted);margin:0 0 24px}.field{display:flex;flex-direction:column;gap:7px;margin-bottom:15px}.field label{font-weight:700;font-size:14px}.field input,.field textarea,.field select{width:100%;background:#111;border:1px solid var(--line);border-radius:8px;padding:12px;color:var(--text);outline:none}.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--gold)}.field textarea{min-height:105px;resize:vertical}.message{padding:11px 13px;border-radius:8px;margin:12px 0;display:none}.message.error{display:block;background:#3a201f;color:#ffb9b2}.message.success{display:block;background:#1d3427;color:#a6e0b8}.dashboard{display:none}.welcome{display:flex;justify-content:space-between;align-items:end;margin-bottom:24px}.welcome h1{font-size:29px;margin:0 0 5px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px}.stat,.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px}.stat{padding:18px}.stat span{color:var(--muted);font-size:13px}.stat strong{display:block;font:700 28px 'DM Sans';margin-top:7px}.layout{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(300px,.75fr);gap:18px}.panel{padding:20px;margin-bottom:18px}.panel h2{font-size:20px;margin:0 0 17px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 13px}.full{grid-column:1/-1}.form-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:5px}.project-list{display:flex;flex-direction:column;gap:10px}.project{display:flex;gap:13px;padding:12px;background:#141414;border:1px solid var(--line);border-radius:9px;align-items:center}.thumb{width:78px;height:66px;flex:0 0 78px;border-radius:6px;background:#292929;object-fit:cover}.project-info{min-width:0;flex:1}.project-info strong{display:block;font-size:16px;overflow-wrap:anywhere}.project-info small{color:var(--muted)}.project-actions{display:flex;gap:6px;flex-wrap:wrap}.project-actions .btn{padding:7px 10px;font-size:12px}.empty{padding:25px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:9px}.hint{font-size:12px;color:var(--muted);line-height:1.7;margin-top:5px}.image-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(125px,1fr));gap:10px;margin-top:10px}.image-card{position:relative;border:1px solid var(--line);border-radius:9px;padding:8px;background:#141414;min-width:0}.image-card.selected{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold)}.image-card img{width:100%;height:92px;object-fit:cover;border-radius:5px;display:block}.image-card label{display:flex;gap:6px;align-items:center;font-size:12px;margin-top:7px;cursor:pointer}.image-card .btn{width:100%;margin-top:7px;padding:6px;font-size:11px}.status{display:inline-block;border-radius:30px;padding:3px 9px;font-size:11px;margin-top:5px}.status.published{background:#1c3929;color:#9ad9ad}.status.draft{background:#383126;color:#d8bd8a}.hidden{display:none!important}@media(max-width:800px){.layout{grid-template-columns:1fr}.stats{gap:8px}.stat{padding:13px}.shell{padding:18px 13px}.welcome{align-items:start;gap:12px;flex-direction:column}}@media(max-width:520px){.form-grid{grid-template-columns:1fr}.full{grid-column:auto}.top{align-items:flex-start}.top-actions{flex-direction:column;align-items:stretch}.project{align-items:flex-start;flex-wrap:wrap}.project-actions{width:100%;padding-right:90px}.stats{grid-template-columns:1fr 1fr}.stat:last-child{grid-column:1/-1}}
 </style>
 </head>
 <body>
@@ -50,7 +50,7 @@
               <div class="field full"><label for="projectDescription">وصف المشروع</label><textarea id="projectDescription" placeholder="نبذة مختصرة عن المشروع..."></textarea></div>
               <div class="field"><label for="projectStatus">حالة المشروع</label><select id="projectStatus"><option value="draft">مسودة</option><option value="published">منشور</option></select></div>
               <div class="field"><label for="projectOrder">ترتيب العرض</label><input id="projectOrder" type="number" value="0"></div>
-              <div class="field full"><label for="projectImages">صور المشروع</label><input id="projectImages" type="file" accept="image/jpeg,image/png,image/webp" multiple><div class="hint">JPG أو PNG أو WEBP، بحد أقصى 20 ميجابايت للصورة. يجب حفظ المشروع أولاً ثم تُرفع الصور إلى مستودع GitHub.</div></div>
+              <div class="field full"><label for="projectImages">صور المشروع</label><input id="projectImages" type="file" accept="image/jpeg,image/png,image/webp" multiple><div class="hint">JPG أو PNG أو WEBP، بحد أقصى 20 ميجابايت للصورة. يمكنك اختيار صورة الغلاف من الصور الحالية أو الجديدة.</div><div id="savedProjectImages" class="image-grid"><div class="hint">احفظ المشروع أولاً لإضافة الصور.</div></div><div id="newProjectImagePreview" class="image-grid"></div></div>
               <div class="field full"><label for="projectVideos">روابط فيديوهات المشروع</label><textarea id="projectVideos" placeholder="ضع رابط كل فيديو في سطر مستقل (YouTube أو Vimeo أو MP4)"></textarea><div class="hint">يمكن إضافة أكثر من فيديو، رابط واحد في كل سطر.</div></div>
               <div class="field full"><label for="projectTourImages">صور الجولة الافتراضية 360°</label><input id="projectTourImages" type="file" accept="image/jpeg,image/png,image/webp" multiple><div class="hint">ارفع صور بانورامية حقيقية 360° بنسبة 2:1 (مثال 6000×3000). الصور العادية لن تعمل كجولة. الحد الأقصى 20MB للصورة.</div><div id="savedTourImages" class="hint">لا توجد مشاهد محفوظة بعد.</div></div>
             </div>
@@ -88,7 +88,7 @@
 const $ = id => document.getElementById(id);
 let projects = [];
 let categories = [];
-let busy = false;
+let busy = false;\nlet savedImages = [];\nlet currentCoverImage = null;\nlet selectedSavedCoverId = null;\nlet selectedNewCoverIndex = null;\nlet previewUrls = [];
 
 function showMessage(id, message, type='error') {
   const el = $(id); el.textContent = message; el.className = 'message ' + type;
@@ -135,8 +135,30 @@ function renderProjects() {
     return '<article class="project">'+image+'<div class="project-info"><strong>'+escapeHtml(p.title)+'</strong><small>'+escapeHtml(p.category_name||'بدون تصنيف')+' · '+escapeHtml(p.location||'')+'</small><br><span class="status '+(p.status==='published'?'published':'draft')+'">'+(p.status==='published'?'منشور':'مسودة')+'</span></div><div class="project-actions"><button class="btn" data-edit="'+p.id+'">تعديل</button><button class="btn danger" data-delete="'+p.id+'">حذف</button></div></article>';
   }).join('');
 }
+function clearImagePreviews() {
+  previewUrls.forEach(url=>URL.revokeObjectURL(url)); previewUrls=[];
+  $('newProjectImagePreview').innerHTML='';
+}
+function renderSavedProjectImages() {
+  const host=$('savedProjectImages');
+  if(!savedImages.length){host.innerHTML='<div class="hint">لا توجد صور محفوظة لهذا المشروع بعد.</div>';return;}
+  host.innerHTML=savedImages.map(img=>{
+    const selected=String(selectedSavedCoverId)===String(img.id);
+    return '<div class="image-card '+(selected?'selected':'')+'"><img src="'+escapeHtml(img.image_url)+'" alt=""><label><input type="radio" name="savedCoverChoice" value="'+img.id+'" '+(selected?'checked':'')+'> '+(selected?'صورة الغلاف':'اختيار كغلاف')+'</label><button type="button" class="btn danger" data-remove-image="'+img.id+'">حذف الصورة</button></div>';
+  }).join('');
+}
+function renderNewProjectPreviews() {
+  clearImagePreviews();
+  const files=Array.from($('projectImages').files||[]);
+  $('newProjectImagePreview').innerHTML=files.map((file,i)=>{
+    const url=URL.createObjectURL(file);previewUrls.push(url);
+    const selected=selectedNewCoverIndex===i;
+    return '<div class="image-card '+(selected?'selected':'')+'"><img src="'+url+'" alt=""><label><input type="radio" name="newCoverChoice" value="'+i+'" '+(selected?'checked':'')+'> '+(selected?'صورة الغلاف':'اختيار كغلاف')+'</label></div>';
+  }).join('');
+}
 function resetForm() {
-  $('projectForm').reset(); $('projectId').value=''; $('projectOrder').value='0'; $('editorTitle').textContent='إضافة مشروع جديد'; $('saveProjectButton').textContent='حفظ المشروع'; $('projectVideos').value=''; $('projectTourImages').value=''; $('savedTourImages').textContent='لا توجد مشاهد محفوظة بعد.'; renderCategoryOptions(); clearMessage('projectMessage');
+  clearImagePreviews(); savedImages=[]; currentCoverImage=null; selectedSavedCoverId=null; selectedNewCoverIndex=null;
+  $('projectForm').reset(); $('projectId').value=''; $('projectOrder').value='0'; $('editorTitle').textContent='إضافة مشروع جديد'; $('saveProjectButton').textContent='حفظ المشروع'; $('projectVideos').value=''; $('projectTourImages').value=''; $('savedTourImages').textContent='لا توجد مشاهد محفوظة بعد.'; $('savedProjectImages').innerHTML='<div class="hint">احفظ المشروع أولاً لإضافة الصور.</div>'; renderCategoryOptions(); clearMessage('projectMessage');
 }
 async function editProject(id) {
   const p=projects.find(x=>Number(x.id)===Number(id)); if(!p)return;
@@ -150,6 +172,11 @@ async function editProject(id) {
   try {
     const media = await api('/projects/'+id+'/media');
     $('projectVideos').value=(media.media||[]).filter(x=>x.image_type==='video').map(x=>x.image_url).join('\n');
+    savedImages=(media.media||[]).filter(x=>['cover','gallery','image'].includes(x.image_type));
+    currentCoverImage=media.cover_image||p.cover_image||null;
+    const cover=savedImages.find(x=>x.image_url===currentCoverImage)||savedImages.find(x=>x.image_type==='cover');
+    selectedSavedCoverId=cover?cover.id:null;
+    renderSavedProjectImages();
     const savedTours=(media.media||[]).filter(x=>x.image_type==='tour360');
     const legacyTours=(media.media||[]).filter(x=>x.image_type==='tour');
     $('savedTourImages').textContent=savedTours.length
@@ -157,6 +184,33 @@ async function editProject(id) {
       : (legacyTours.length?'توجد روابط جولات قديمة محفوظة؛ لم يتم حذفها.':'لا توجد مشاهد 360° محفوظة بعد.');
   } catch(err) { showMessage('projectMessage','تعذر تحميل روابط الفيديو والجولات: '+err.message); }
 }
+$('projectImages').addEventListener('change',()=>{
+  selectedNewCoverIndex=null;
+  renderNewProjectPreviews();
+});
+$('newProjectImagePreview').addEventListener('change',e=>{
+  const radio=e.target.closest('input[name="newCoverChoice"]');
+  if(radio){selectedNewCoverIndex=Number(radio.value);selectedSavedCoverId=null;renderNewProjectPreviews();renderSavedProjectImages();}
+});
+$('savedProjectImages').addEventListener('change',e=>{
+  const radio=e.target.closest('input[name="savedCoverChoice"]');
+  if(radio){selectedSavedCoverId=Number(radio.value);selectedNewCoverIndex=null;renderSavedProjectImages();renderNewProjectPreviews();}
+});
+$('savedProjectImages').addEventListener('click',async e=>{
+  const button=e.target.closest('[data-remove-image]');if(!button)return;
+  const imageId=button.dataset.removeImage;
+  if(!confirm('هل تريد إزالة هذه الصورة من المشروع؟'))return;
+  button.disabled=true;
+  try{
+    const result=await api('/projects/'+$('projectId').value+'/images/'+imageId,{method:'DELETE'});
+    savedImages=result.images||[];currentCoverImage=result.cover_image||null;
+    const cover=savedImages.find(x=>x.image_url===currentCoverImage)||savedImages.find(x=>x.image_type==='cover');
+    selectedSavedCoverId=cover?cover.id:null;selectedNewCoverIndex=null;
+    renderSavedProjectImages();
+    await refreshAll();
+    showMessage('projectMessage','تمت إزالة الصورة من المشروع.','success');
+  }catch(err){showMessage('projectMessage',err.message);button.disabled=false;}
+});
 $('loginForm').addEventListener('submit',async e=>{
   e.preventDefault(); clearMessage('loginMessage'); setBusy(true,'loginButton');
   try { await api('/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:$('username').value,password:$('password').value})}); $('password').value=''; showDashboard(); await refreshAll(); }
@@ -189,10 +243,16 @@ $('projectForm').addEventListener('submit',async e=>{
     await api('/projects/'+saved.id+'/media',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({videos:mediaLines('projectVideos')})});
     const files=Array.from($('projectImages').files||[]);
     const tourFiles=Array.from($('projectTourImages').files||[]);
-    let coverUrl=null;
+    const uploadedImages=[];
     for(let i=0;i<files.length;i++){
-      const form=new FormData();form.append('file',files[i]);form.append('project_id',String(saved.id));form.append('image_type',i===0?'cover':'gallery');form.append('is_cover',i===0?'true':'false');
-      const uploaded=await api('/upload',{method:'POST',body:form});if(i===0)coverUrl=uploaded.url;
+      if(files[i].size>20*1024*1024) throw new Error('الصورة '+files[i].name+' تتجاوز 20 ميجابايت.');
+      const form=new FormData();form.append('file',files[i]);form.append('project_id',String(saved.id));form.append('image_type','gallery');
+      const uploaded=await api('/upload',{method:'POST',body:form});uploadedImages.push(uploaded);
+    }
+    if(selectedNewCoverIndex!==null && uploadedImages[selectedNewCoverIndex]){
+      await api('/projects/'+saved.id+'/cover',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({image_id:uploadedImages[selectedNewCoverIndex].id})});
+    }else if(selectedSavedCoverId!==null){
+      await api('/projects/'+saved.id+'/cover',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({image_id:selectedSavedCoverId})});
     }
     if(coverUrl){payload.cover_image=coverUrl;await api('/projects/'+saved.id,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});}
     for(const file of tourFiles){
