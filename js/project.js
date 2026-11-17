@@ -23,7 +23,7 @@
   const panoeeEmbedFor=t=>{try{const u=new URL(t.image_url),id=u.pathname.split('/').filter(Boolean).pop();if(!id)return '';return u.pathname.startsWith('/iframe/')?u.href:'https://tour.panoee.net/iframe/'+encodeURIComponent(id)+'?embedFullscreen=1&embedVr=1&embedGyro=1';}catch{return '';}};
   const tourCover=(p.cover_image||photos.find(m=>m.image_url)?.image_url||'');
   const tourSection=validPanoeeTours.length
-   ? '<div class="panoee-tour-list">'+validPanoeeTours.map((t,i)=>'<button class="panoee-tour-card" type="button" data-panoee-index="'+i+'">'+(tourCover?'<img src="'+esc(tourCover)+'" alt="'+esc(p.title)+'" loading="lazy">':'<span class="panoee-tour-placeholder">YN 3D</span>')+'<span class="panoee-tour-shade"></span><span class="panoee-tour-label"><strong>360°</strong><span>'+esc(t.github_path||('جولة '+(i+1)))+'</span></span><span class="panoee-tour-play" aria-hidden="true">▶</span></button>').join('')+'</div><div class="panoee-lightbox" id="panoee-lightbox" aria-hidden="true"><div class="panoee-lightbox-panel" id="panoee-lightbox-panel" role="dialog" aria-modal="true" aria-label="Panoee virtual tour"><div class="panoee-lightbox-header"><span id="panoee-active-tour-title">360° VIRTUAL EXPERIENCE</span><button class="panoee-close" id="panoee-close" type="button" aria-label="Close virtual tour">×</button></div><iframe class="panoee-embed-frame" id="panoee-embed-frame" title="360° virtual tour" src="about:blank" loading="lazy" scrolling="no" allow="autoplay; accelerometer; gyroscope; fullscreen; xr-spatial-tracking" allowfullscreen></iframe></div></div>'
+   ? '<div class="panoee-tour-list">'+validPanoeeTours.map((t,i)=>'<button class="panoee-tour-card" type="button" data-panoee-index="'+i+'">'+(tourCover?'<img src="'+esc(tourCover)+'" alt="'+esc(p.title)+'" loading="lazy">':'<span class="panoee-tour-placeholder">YN 3D</span>')+'<span class="panoee-tour-shade"></span><span class="panoee-tour-label"><strong>360°</strong><span>'+esc(t.github_path||('جولة '+(i+1)))+'</span></span><span class="panoee-tour-play" aria-hidden="true">▶</span></button>').join('')+'</div><div class="panoee-lightbox" id="panoee-lightbox" aria-hidden="true"><div class="panoee-lightbox-panel" id="panoee-lightbox-panel" role="dialog" aria-modal="true" aria-label="Panoee virtual tour"><div class="panoee-lightbox-header"><span id="panoee-active-tour-title">360° VIRTUAL EXPERIENCE</span><button class="panoee-close" id="panoee-close" type="button" aria-label="Close virtual tour">×</button></div><iframe class="panoee-embed-frame" id="panoee-embed-frame" title="360° virtual tour" src="about:blank" loading="eager" scrolling="no" allow="autoplay; accelerometer; gyroscope; fullscreen; xr-spatial-tracking" allowfullscreen></iframe></div></div>'
    : panoeeTours.length?'<div class="media-empty">رابط جولة Panoee غير صالح. يرجى مراجعته من لوحة الإدارة.</div>'
    : panoramas.length
      ? '<div class="panorama-gallery" id="panorama-gallery">'+panoramas.map((item,index)=>'<button class="panorama-thumb" type="button" data-pano-index="'+index+'" aria-label="Open 360 panorama '+(index+1)+'"><img src="'+esc(item.image_url)+'" alt="360° panorama '+(index+1)+'" loading="lazy"><span class="panorama-thumb-overlay"><strong>360°</strong><span>VIEW PANORAMA '+String(index+1).padStart(2,'0')+'</span></span></button>').join('')+'</div><div class="pano-lightbox" id="pano-lightbox" aria-hidden="true"><div class="pano-lightbox-panel" role="dialog" aria-modal="true" aria-label="Interactive 360 degree panorama"><div class="pano-lightbox-header"><span id="pano-view-title">360° VIRTUAL EXPERIENCE</span><button id="pano-close" class="pano-close" type="button" aria-label="Close viewer">×</button></div><div id="virtual-pano" class="virtual-pano"><div class="pano-loading">Loading 360° experience…</div></div><div class="virtual-tour-toolbar"><div id="pano-scenes" class="pano-scenes" aria-label="Tour viewpoints"></div><div class="pano-controls"><button id="pano-zoom-out" type="button" aria-label="Zoom out">−</button><button id="pano-zoom-in" type="button" aria-label="Zoom in">＋</button><button id="pano-reset" type="button" aria-label="Reset view">◎</button><button id="pano-fullscreen" type="button" aria-label="Fullscreen">⛶</button></div></div></div></div>'
@@ -93,7 +93,20 @@
   const activeTitle=document.getElementById('panoee-active-tour-title');
   if(!modal||!frame||!openButtons.length||!panel)return;
   const panoeeOrigin='https://tour.panoee.net';
-  const panoeeEmbedFor=t=>{try{const u=new URL(t.image_url),id=u.pathname.split('/').filter(Boolean).pop();if(!id)return '';return u.pathname.startsWith('/iframe/')?u.href:'https://tour.panoee.net/iframe/'+encodeURIComponent(id)+'?embedFullscreen=1&embedVr=1&embedGyro=1';}catch{return '';}};
+  const panoeeEmbedFor=t=>{
+   try{
+    const u=new URL(t.image_url);
+    if(u.protocol!=='https:'||u.hostname!=='tour.panoee.net')return '';
+    const parts=u.pathname.split('/').filter(Boolean);
+    const id=u.pathname.startsWith('/iframe/')?parts[1]:parts[parts.length-1];
+    if(!id||!/^[A-Za-z0-9_-]+$/.test(id))return '';
+    const embed=new URL('/iframe/'+encodeURIComponent(id),panoeeOrigin);
+    embed.searchParams.set('embedFullscreen','1');
+    embed.searchParams.set('embedVr','1');
+    embed.searchParams.set('embedGyro','1');
+    return embed.href;
+   }catch{return '';}
+  };
   let motionStarted=false,frameReady=false;
   const relayMotion=event=>{
    if(!motionStarted||!frameReady||!frame.contentWindow)return;
@@ -158,7 +171,7 @@
   closeButton.addEventListener('click',close);
   modal.addEventListener('click',event=>{if(event.target===modal)close();});
   document.addEventListener('keydown',event=>{if(event.key==='Escape'&&modal.classList.contains('open'))close();});
-  frame.addEventListener('load',()=>{frameReady=true;});
+  frame.addEventListener('load',()=>{frameReady=frame.src!=='about:blank';});
  }
  function setupVirtualTour(items){
   const lightbox=document.getElementById('pano-lightbox'),pano=document.getElementById('virtual-pano'),list=document.getElementById('pano-scenes');
