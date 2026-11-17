@@ -159,7 +159,7 @@ async function handleApi(request, env) {
     ).bind(slug).first();
     if (!project) return json({ error: "المشروع غير موجود أو غير منشور." }, 404);
     const media = await env.DB.prepare(
-      "SELECT id, image_url, image_type, sort_order FROM project_images WHERE project_id = ? ORDER BY sort_order, id"
+      "SELECT id, github_path, image_url, image_type, sort_order FROM project_images WHERE project_id = ? ORDER BY sort_order, id"
     ).bind(project.id).all();
     return json({ project, media: media.results || [] });
   }
@@ -289,7 +289,7 @@ async function handleApi(request, env) {
   if (projectMediaMatch && method === "GET") {
     const projectId = Number(projectMediaMatch[1]);
     const result = await env.DB.prepare(
-      "SELECT id, image_url, image_type, sort_order FROM project_images WHERE project_id = ? ORDER BY image_type, sort_order, id"
+      "SELECT id, github_path, image_url, image_type, sort_order FROM project_images WHERE project_id = ? ORDER BY image_type, sort_order, id"
     ).bind(projectId).all();
     const project = await env.DB.prepare("SELECT cover_image FROM projects WHERE id = ?").bind(projectId).first();
     return json({ media: result.results || [], cover_image: project ? project.cover_image : null });
@@ -366,12 +366,12 @@ async function handleApi(request, env) {
   if (path === "/api/upload" && method === "POST") {
     const form = await request.formData();
     const file = form.get("file");
-    if (!file || typeof file.arrayBuffer !== "function") return json({ error: "اختر صورة أولاً." }, 400);
+    if (!file || typeof file.arrayBuffer !== "function") return json({ error: "اختر ملفاً أولاً." }, 400);
     const isProjectAudio=String(form.get("image_type")||"")==="projectAudio";
     if(isProjectAudio?(file.type!=="audio/mpeg"&&!/\.mp3$/i.test(file.name||"")):!["image/jpeg","image/png","image/webp"].includes(file.type)){
       return json({error:isProjectAudio?"يرجى رفع ملف MP3 فقط.":"الصيغ المدعومة هي JPG وPNG وWEBP فقط."},415);
     }
-    if (file.size > MAX_UPLOAD_BYTES) return json({ error: "حجم الصورة يتجاوز 20 ميجابايت. قلّل حجمها ثم أعد المحاولة." }, 413);
+    if (file.size > MAX_UPLOAD_BYTES) return json({ error: "حجم الملف يتجاوز 20 ميجابايت. قلّل حجمه ثم أعد المحاولة." }, 413);
     const projectId = String(form.get("project_id") || "general").replace(/[^0-9]/g, "") || "general";
     const requestedType = String(form.get("image_type") || "image");
     const allowedTypes = ["image", "cover", "gallery", "tour360", "projectAudio"];
