@@ -44,6 +44,7 @@
           <div class="field"><label for="settingNavProjects">رابط المشاريع</label><input id="settingNavProjects" maxlength="60"></div>
           <div class="field"><label for="settingNavAbout">رابط نبذة عنا</label><input id="settingNavAbout" maxlength="60"></div>
           <div class="field"><label for="settingNavContact">رابط التواصل</label><input id="settingNavContact" maxlength="60"></div>
+          <div class="field"><label for="settingContactWhatsapp">رقم واتساب مع مفتاح الدولة</label><input id="settingContactWhatsapp" inputmode="numeric" placeholder="9665XXXXXXXX" maxlength="20"></div>
           <div class="field"><label for="settingAboutEyebrow">عنوان قسم النبذة الصغير</label><input id="settingAboutEyebrow" maxlength="120"></div>
           <div class="field"><label for="settingAboutTitle">عنوان قسم النبذة</label><input id="settingAboutTitle" maxlength="160"></div>
           <div class="field"><label for="settingAboutAccent">العبارة المميزة في قسم النبذة</label><input id="settingAboutAccent" maxlength="160"></div>
@@ -195,7 +196,7 @@ const siteSettingDefaults = {"heroEyebrow":"INDEPENDENT 3D DESIGNER · RIYADH","
 let currentSiteSettings = {};
 function applySettingsToForm(settings={}) {
   currentSiteSettings={...siteSettingDefaults,...settings};
-  const fields={heroEyebrow:'settingHeroEyebrow',heroTitle:'settingHeroTitle',heroAccent:'settingHeroAccent',heroText:'settingHeroText',navProjects:'settingNavProjects',navAbout:'settingNavAbout',navContact:'settingNavContact',aboutEyebrow:'settingAboutEyebrow',aboutTitle:'settingAboutTitle',aboutAccent:'settingAboutAccent',aboutText:'settingAboutText',portfolioEyebrow:'settingPortfolioEyebrow',portfolioTitle:'settingPortfolioTitle',portfolioAccent:'settingPortfolioAccent',tourEyebrow:'settingTourEyebrow',tourTitle:'settingTourTitle',tourAccent:'settingTourAccent',tourText:'settingTourText',tourButton:'settingTourButton',footerText:'settingFooterText',footerCopyright:'settingFooterCopyright'};
+  const fields={heroEyebrow:'settingHeroEyebrow',heroTitle:'settingHeroTitle',heroAccent:'settingHeroAccent',heroText:'settingHeroText',navProjects:'settingNavProjects',navAbout:'settingNavAbout',navContact:'settingNavContact',contactWhatsapp:'settingContactWhatsapp',aboutEyebrow:'settingAboutEyebrow',aboutTitle:'settingAboutTitle',aboutAccent:'settingAboutAccent',aboutText:'settingAboutText',portfolioEyebrow:'settingPortfolioEyebrow',portfolioTitle:'settingPortfolioTitle',portfolioAccent:'settingPortfolioAccent',tourEyebrow:'settingTourEyebrow',tourTitle:'settingTourTitle',tourAccent:'settingTourAccent',tourText:'settingTourText',tourButton:'settingTourButton',footerText:'settingFooterText',footerCopyright:'settingFooterCopyright'};
   Object.entries(fields).forEach(([key,id])=>$(id).value=currentSiteSettings[key]??siteSettingDefaults[key]??'');
   $('settingHeroImagePreview').src=currentSiteSettings.heroImage||'';
   $('settingHeroImagePreview').style.display=currentSiteSettings.heroImage?'block':'none';
