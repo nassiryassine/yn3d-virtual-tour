@@ -325,10 +325,18 @@ async function handleApi(request, env) {
         if(!name||!value)return json({error:"يرجى إدخال مسمّى ورابط لكل جولة."},400);
         let parsed;try{parsed=new URL(value);}catch{return json({error:"رابط Panoee غير صالح."},400);}
         if(parsed.protocol!=="https:"||parsed.hostname!=="tour.panoee.net"||!/^\/[A-Za-z0-9_-]+(?:\/.*)?$/.test(parsed.pathname))return json({error:"يرجى إدخال رابط جولة صحيح من tour.panoee.net."},400);
-        normalized.push({name,url:parsed.href});
+        const coverImage=String(item?.coverImage||"").trim();
+        if(coverImage){
+          const cover=await env.DB.prepare("SELECT id FROM project_images WHERE project_id = ? AND image_url = ? AND image_type IN ('cover','gallery','image') LIMIT 1").bind(projectId,coverImage).first();
+          if(!cover)return json({error:"صورة غلاف الجولة يجب أن تكون من صور هذا المشروع المحفوظة."},400);
+        }
+        normalized.push({name,url:parsed.href,coverImage});
       }
       await env.DB.prepare("DELETE FROM project_images WHERE project_id = ? AND image_type = 'externalTour'").bind(projectId).run();
-      for(let i=0;i<normalized.length;i++)await env.DB.prepare("INSERT INTO project_images (project_id, github_path, image_url, image_type, sort_order) VALUES (?, ?, ?, ?, ?)").bind(projectId,normalized[i].name,normalized[i].url,"externalTour",i).run();
+      for(let i=0;i<normalized.length;i++){
+        const metadata=JSON.stringify({name:normalized[i].name,coverImage:normalized[i].coverImage});
+        await env.DB.prepare("INSERT INTO project_images (project_id, github_path, image_url, image_type, sort_order) VALUES (?, ?, ?, ?, ?)").bind(projectId,metadata,normalized[i].url,"externalTour",i).run();
+      }
     }
     return json({ ok: true });
   }
