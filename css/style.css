@@ -161,3 +161,29 @@ footer .brand-mark{color:#f7f1eb}
   *,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
   .reveal-ready [data-reveal]{opacity:1;transform:none}
 }
+
+
+/* 3DYN Moroccan emblem with the site's warm orange spotlight */
+.brand{display:flex;align-items:center;gap:0;min-width:0}
+.brand-logo{
+  display:block;width:112px;height:76px;object-fit:contain;
+  filter:drop-shadow(0 0 7px rgba(255,105,36,.52)) drop-shadow(0 0 20px rgba(255,83,20,.27));
+  transition:filter .35s ease,transform .35s ease;
+  animation:logoEmber 5.5s ease-in-out infinite;
+}
+.brand:hover .brand-logo{
+  transform:translateY(-2px);
+  filter:drop-shadow(0 0 10px rgba(255,123,53,.8)) drop-shadow(0 0 30px rgba(255,75,12,.48));
+}
+.site-header .brand-logo{width:104px;height:68px}
+footer .brand-logo{width:116px;height:82px}
+@keyframes logoEmber{
+  0%,100%{filter:drop-shadow(0 0 5px rgba(255,105,36,.38)) drop-shadow(0 0 14px rgba(255,83,20,.16))}
+  50%{filter:drop-shadow(0 0 10px rgba(255,126,54,.7)) drop-shadow(0 0 25px rgba(255,75,12,.34))}
+}
+@media(max-width:760px){
+  .site-header{padding:12px 6vw}
+  .site-header .brand-logo{width:86px;height:58px}
+  footer .brand-logo{width:100px;height:70px}
+}
+@media(prefers-reduced-motion:reduce){.brand-logo{animation:none}}
