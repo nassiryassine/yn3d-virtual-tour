@@ -188,7 +188,7 @@ async function handleApi(request, env) {
     const body = await request.json().catch(() => ({}));
     const settings = body && typeof body.settings === "object" && body.settings ? body.settings : null;
     if (!settings) return json({ error: "بيانات إعدادات الموقع غير صالحة." }, 400);
-    const allowed = ["heroEyebrow","heroTitle","heroAccent","heroText","heroImage","navProjects","navAbout","navContact","aboutEyebrow","aboutTitle","aboutAccent","aboutText","portfolioEyebrow","portfolioTitle","portfolioAccent","tourEyebrow","tourTitle","tourAccent","tourText","tourButton","footerText","footerCopyright","logo"];
+    const allowed = ["heroEyebrow","heroTitle","heroAccent","heroText","heroImage","navProjects","navAbout","navContact","contactWhatsapp","aboutEyebrow","aboutTitle","aboutAccent","aboutText","portfolioEyebrow","portfolioTitle","portfolioAccent","tourEyebrow","tourTitle","tourAccent","tourText","tourButton","footerText","footerCopyright","logo"];
     const clean = {};
     for (const key of allowed) {
       if (Object.prototype.hasOwnProperty.call(settings,key)) clean[key] = String(settings[key] ?? "").slice(0, key === "heroImage" || key === "logo" ? 2000 : 500);
