@@ -23,20 +23,29 @@
   const panoeeEmbedFor=t=>{try{const u=new URL(t.image_url),id=u.pathname.split('/').filter(Boolean).pop();if(!id)return '';return u.pathname.startsWith('/iframe/')?u.href:'https://tour.panoee.net/iframe/'+encodeURIComponent(id)+'?embedFullscreen=1&embedVr=1&embedGyro=1';}catch{return '';}};
   const tourCover=(p.cover_image||photos.find(m=>m.image_url)?.image_url||'');
   const tourSection=validPanoeeTours.length
-   ? '<div class="panoee-tour-list">'+validPanoeeTours.map((t,i)=>'<button class="panoee-tour-card" type="button" data-panoee-index="'+i+'">'+(tourCover?'<img src="'+esc(tourCover)+'" alt="'+esc(p.title)+'" loading="lazy">':'<span class="panoee-tour-placeholder">YN 3D</span>')+'<span class="panoee-tour-shade"></span><span class="panoee-tour-label"><strong>360°</strong><span>'+esc(t.github_path||('جولة '+(i+1)))+'</span></span><span class="panoee-tour-play" aria-hidden="true">▶</span></button>').join('')+'</div><div class="panoee-lightbox" id="panoee-lightbox" aria-hidden="true"><div class="panoee-lightbox-panel" id="panoee-lightbox-panel" role="dialog" aria-modal="true" aria-label="Panoee virtual tour"><div class="panoee-lightbox-header"><span id="panoee-active-tour-title">360° VIRTUAL EXPERIENCE</span><button class="panoee-close" id="panoee-close" type="button" aria-label="Close virtual tour">×</button></div><iframe class="panoee-embed-frame" id="panoee-embed-frame" title="360° virtual tour" src="about:blank" loading="eager" scrolling="no" allow="autoplay; accelerometer; gyroscope; fullscreen; xr-spatial-tracking" allowfullscreen></iframe></div></div>'
+   ? '<div class="panoee-tour-list">'+validPanoeeTours.map((t,i)=>'<button class="panoee-tour-card" type="button" data-panoee-index="'+i+'">'+(tourCover?'<img src="'+esc(tourCover)+'" alt="'+esc(p.title)+'" loading="lazy">':'<span class="panoee-tour-placeholder">YN 3D</span>')+'<span class="panoee-tour-shade"></span><span class="panoee-tour-label"><strong>360°</strong><span>'+esc(t.github_path||('جولة '+(i+1)))+'</span></span><span class="panoee-tour-play" aria-hidden="true">▶</span></button>').join('')+'</div><div class="panoee-lightbox" id="panoee-lightbox" aria-hidden="true"><div class="panoee-lightbox-panel" id="panoee-lightbox-panel" role="dialog" aria-modal="true" aria-label="Panoee virtual tour"><div class="panoee-lightbox-header"><span id="panoee-active-tour-title">360° VIRTUAL EXPERIENCE</span><button class="panoee-close" id="panoee-close" type="button" aria-label="Close virtual tour">×</button></div><div class="panoee-loading" id="panoee-loading"><span class="panoee-loader-ring"></span><span>PREPARING YOUR 360° EXPERIENCE</span></div><iframe class="panoee-embed-frame" id="panoee-embed-frame" title="360° virtual tour" src="about:blank" loading="eager" scrolling="no" allow="autoplay; accelerometer; gyroscope; fullscreen; xr-spatial-tracking" allowfullscreen></iframe></div></div>'
    : panoeeTours.length?'<div class="media-empty">رابط جولة Panoee غير صالح. يرجى مراجعته من لوحة الإدارة.</div>'
    : panoramas.length
      ? '<div class="panorama-gallery" id="panorama-gallery">'+panoramas.map((item,index)=>'<button class="panorama-thumb" type="button" data-pano-index="'+index+'" aria-label="Open 360 panorama '+(index+1)+'"><img src="'+esc(item.image_url)+'" alt="360° panorama '+(index+1)+'" loading="lazy"><span class="panorama-thumb-overlay"><strong>360°</strong><span>VIEW PANORAMA '+String(index+1).padStart(2,'0')+'</span></span></button>').join('')+'</div><div class="pano-lightbox" id="pano-lightbox" aria-hidden="true"><div class="pano-lightbox-panel" role="dialog" aria-modal="true" aria-label="Interactive 360 degree panorama"><div class="pano-lightbox-header"><span id="pano-view-title">360° VIRTUAL EXPERIENCE</span><button id="pano-close" class="pano-close" type="button" aria-label="Close viewer">×</button></div><div id="virtual-pano" class="virtual-pano"><div class="pano-loading">Loading 360° experience…</div></div><div class="virtual-tour-toolbar"><div id="pano-scenes" class="pano-scenes" aria-label="Tour viewpoints"></div><div class="pano-controls"><button id="pano-zoom-out" type="button" aria-label="Zoom out">−</button><button id="pano-zoom-in" type="button" aria-label="Zoom in">＋</button><button id="pano-reset" type="button" aria-label="Reset view">◎</button><button id="pano-fullscreen" type="button" aria-label="Fullscreen">⛶</button></div></div></div></div>'
      : '<div class="media-empty">An interactive 360° tour will appear here when panorama scenes are uploaded from the administration panel.</div>';
   const projectAudio=media.find(m=>m.image_type==='projectAudio');
-  const audioMarkup=projectAudio?'<div class="project-audio-player"><span>PROJECT SOUNDTRACK</span><audio id="project-soundtrack" src="'+esc(projectAudio.image_url)+'" autoplay controls preload="auto"></audio></div>':'';
+  const audioMarkup=projectAudio?'<div class="project-audio-player"><div class="audio-player-info"><span class="audio-player-kicker">YN 3D · SOUNDTRACK</span><strong>Project music</strong><span class="audio-player-status" id="audio-player-status">READY TO PLAY</span></div><button class="audio-play-button" id="audio-play-button" type="button" aria-label="Play music"><span id="audio-play-icon">▶</span></button><div class="audio-player-track"><div class="audio-track-times"><span id="audio-current-time">00:00</span><span id="audio-duration">00:00</span></div><input class="audio-progress" id="audio-progress" type="range" min="0" max="100" value="0" step="0.1" aria-label="Music progress"></div><audio id="project-soundtrack" src="'+esc(projectAudio.image_url)+'" preload="metadata"></audio></div>':'';
   root.innerHTML='<section class="project-hero"><p class="eyebrow">'+esc(p.category_name||'YN 3D PROJECT')+'</p><h1>'+esc(p.title)+'</h1><p class="project-description">'+esc(p.description||'Architectural visualization by YN 3D.')+'</p>'+(p.location?'<div class="project-location">'+esc(p.location)+'</div>':'')+'<a class="project-back" href="index.html#work">← BACK TO ALL PROJECTS</a>'+audioMarkup+'</section><section class="project-section"><div class="project-section-heading"><h2>PROJECT <em>GALLERY</em></h2><span>01 / IMAGES</span></div><div class="gallery-grid">'+gallery+'</div><div class="photo-lightbox" id="photo-lightbox" aria-hidden="true"><div class="photo-lightbox-panel" role="dialog" aria-modal="true" aria-label="Project image viewer"><div class="photo-lightbox-header"><span id="photo-lightbox-count"></span><button id="photo-lightbox-close" class="photo-lightbox-close" type="button" aria-label="Close image viewer">×</button></div><div class="photo-lightbox-stage"><button id="photo-lightbox-prev" class="photo-lightbox-nav" type="button" aria-label="Previous image">‹</button><img id="photo-lightbox-image" alt=""><button id="photo-lightbox-next" class="photo-lightbox-nav" type="button" aria-label="Next image">›</button></div></div></div></section><section class="project-section"><div class="project-section-heading"><h2>PROJECT <em>VIDEOS</em></h2><span>02 / MOTION</span></div><div class="video-grid">'+videoSection+'</div></section><section class="project-section"><div class="project-section-heading"><h2>VIRTUAL <em>EXPERIENCE</em></h2><span>03 / 360° TOURS</span></div><div class="tour-grid">'+tourSection+'</div></section>';
   document.title=p.title+' | YN 3D';
   if(photos.length) setupPhotoGallery(photos,p.title);
   if(validPanoeeTours.length)setupPanoeeViewer(validPanoeeTours);
   if(!validPanoeeTours.length&&!panoeeTours.length&&panoramas.length)setupVirtualTour(panoramas);
   const soundtrack=document.getElementById('project-soundtrack');
-  if(soundtrack){soundtrack.play().catch(()=>{soundtrack.controls=true;});window.addEventListener('pagehide',()=>{soundtrack.pause();soundtrack.currentTime=0;});}
+  if(soundtrack){
+   const playButton=document.getElementById('audio-play-button'),playIcon=document.getElementById('audio-play-icon'),status=document.getElementById('audio-player-status'),progress=document.getElementById('audio-progress'),currentTime=document.getElementById('audio-current-time'),duration=document.getElementById('audio-duration');
+   const formatTime=value=>{if(!Number.isFinite(value))return '00:00';const seconds=Math.floor(value);return String(Math.floor(seconds/60)).padStart(2,'0')+':'+String(seconds%60).padStart(2,'0');};
+   const syncPlayer=()=>{const playing=!soundtrack.paused;playIcon.textContent=playing?'Ⅱ':'▶';playButton.setAttribute('aria-label',playing?'Pause music':'Play music');status.textContent=playing?'NOW PLAYING':soundtrack.ended?'PLAYBACK FINISHED':'READY TO PLAY';if(Number.isFinite(soundtrack.duration)){progress.value=soundtrack.duration?String(soundtrack.currentTime/soundtrack.duration*100):'0';duration.textContent=formatTime(soundtrack.duration);}currentTime.textContent=formatTime(soundtrack.currentTime);};
+   playButton.addEventListener('click',()=>{if(soundtrack.paused)soundtrack.play().catch(()=>{status.textContent='TAP TO PLAY';});else soundtrack.pause();});
+   soundtrack.addEventListener('loadedmetadata',syncPlayer);soundtrack.addEventListener('timeupdate',syncPlayer);soundtrack.addEventListener('play',syncPlayer);soundtrack.addEventListener('pause',syncPlayer);soundtrack.addEventListener('ended',syncPlayer);
+   progress.addEventListener('input',()=>{if(Number.isFinite(soundtrack.duration))soundtrack.currentTime=(Number(progress.value)/100)*soundtrack.duration;});
+   soundtrack.play().catch(()=>{status.textContent='TAP TO PLAY';});syncPlayer();
+   window.addEventListener('pagehide',()=>{soundtrack.pause();soundtrack.currentTime=0;});
+  }
  }catch(error){root.innerHTML='<div class="project-loading">'+esc(error.message)+'<p><a href="index.html">Back to portfolio</a></p></div>';}
  function setupPhotoGallery(items,title){
   const lightbox=document.getElementById('photo-lightbox');
@@ -107,7 +116,7 @@
     return embed.href;
    }catch{return '';}
   };
-  let motionStarted=false,frameReady=false;
+  let motionStarted=false,frameReady=false,frameRevealTimer=null;
   const relayParentMotion=event=>{
    if(!frameReady||!event.data||event.data.type!=='devicemotion'||event.source!==window.parent||!frame.contentWindow)return;
    try{frame.contentWindow.postMessage(event.data,panoeeOrigin);}catch(error){console.warn('Panoee parent motion bridge:',error);}
@@ -147,7 +156,7 @@
    }
   };
   const open=async(index)=>{
-   const selected=tours[index];if(!selected)return;frame.src=panoeeEmbedFor(selected);if(activeTitle)activeTitle.textContent=selected.github_path||('جولة '+(index+1));
+   const selected=tours[index];if(!selected)return;clearTimeout(frameRevealTimer);frameReady=false;modal.classList.remove('is-ready');frame.src=panoeeEmbedFor(selected);if(activeTitle)activeTitle.textContent=selected.github_path||('جولة '+(index+1));
    modal.classList.add('open');
    modal.setAttribute('aria-hidden','false');
    document.body.classList.add('panoee-viewer-open');
@@ -169,7 +178,7 @@
    document.body.classList.remove('panoee-viewer-open');
    motionStarted=false;
    window.removeEventListener('devicemotion',relayMotion);
-   frameReady=false;
+   frameReady=false;clearTimeout(frameRevealTimer);modal.classList.remove('is-ready');
    frame.src='about:blank';
    if(document.fullscreenElement&&document.exitFullscreen){try{await document.exitFullscreen();}catch{}}
   };
@@ -177,7 +186,7 @@
   closeButton.addEventListener('click',close);
   modal.addEventListener('click',event=>{if(event.target===modal)close();});
   document.addEventListener('keydown',event=>{if(event.key==='Escape'&&modal.classList.contains('open'))close();});
-  frame.addEventListener('load',()=>{frameReady=frame.src!=='about:blank';});
+  frame.addEventListener('load',()=>{frameReady=frame.src!=='about:blank';if(frameReady){clearTimeout(frameRevealTimer);frameRevealTimer=setTimeout(()=>{if(modal.classList.contains('open'))modal.classList.add('is-ready');},450);}});
  }
  function setupVirtualTour(items){
   const lightbox=document.getElementById('pano-lightbox'),pano=document.getElementById('virtual-pano'),list=document.getElementById('pano-scenes');
