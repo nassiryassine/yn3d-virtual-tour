@@ -143,6 +143,15 @@ async function handleApi(request, env) {
     });
   }
 
+  // Site settings are stored as a single JSON document in D1.
+  if (path === "/api/public/settings" && method === "GET") {
+    await env.DB.prepare("CREATE TABLE IF NOT EXISTS site_settings (id INTEGER PRIMARY KEY CHECK (id = 1), data TEXT NOT NULL, updated_at TEXT DEFAULT CURRENT_TIMESTAMP)").run();
+    const row = await env.DB.prepare("SELECT data FROM site_settings WHERE id = 1").first();
+    let settings = {};
+    try { settings = row ? JSON.parse(row.data || "{}") : {}; } catch {}
+    return json({ settings });
+  }
+
   // Public portfolio endpoints: only published projects are exposed.
   if (path === "/api/public/projects" && method === "GET") {
     const result = await env.DB.prepare(
@@ -166,6 +175,29 @@ async function handleApi(request, env) {
 
   if (!(await isAuthenticated(request, env))) return json({ error: "يرجى تسجيل الدخول أولاً." }, 401);
   if (path === "/api/me" && method === "GET") return json({ ok: true });
+
+  if (path === "/api/settings" && method === "GET") {
+    await env.DB.prepare("CREATE TABLE IF NOT EXISTS site_settings (id INTEGER PRIMARY KEY CHECK (id = 1), data TEXT NOT NULL, updated_at TEXT DEFAULT CURRENT_TIMESTAMP)").run();
+    const row = await env.DB.prepare("SELECT data FROM site_settings WHERE id = 1").first();
+    let settings = {};
+    try { settings = row ? JSON.parse(row.data || "{}") : {}; } catch {}
+    return json({ settings });
+  }
+
+  if (path === "/api/settings" && method === "PUT") {
+    const body = await request.json().catch(() => ({}));
+    const settings = body && typeof body.settings === "object" && body.settings ? body.settings : null;
+    if (!settings) return json({ error: "بيانات إعدادات الموقع غير صالحة." }, 400);
+    const allowed = ["heroEyebrow","heroTitle","heroAccent","heroText","heroImage","navProjects","navAbout","navContact","aboutEyebrow","aboutTitle","aboutAccent","aboutText","portfolioEyebrow","portfolioTitle","portfolioAccent","tourEyebrow","tourTitle","tourAccent","tourText","tourButton","footerText","footerCopyright","logo"];
+    const clean = {};
+    for (const key of allowed) {
+      if (Object.prototype.hasOwnProperty.call(settings,key)) clean[key] = String(settings[key] ?? "").slice(0, key === "heroImage" || key === "logo" ? 2000 : 500);
+    }
+    await env.DB.prepare("CREATE TABLE IF NOT EXISTS site_settings (id INTEGER PRIMARY KEY CHECK (id = 1), data TEXT NOT NULL, updated_at TEXT DEFAULT CURRENT_TIMESTAMP)").run();
+    await env.DB.prepare("INSERT INTO site_settings (id,data,updated_at) VALUES (1,?,CURRENT_TIMESTAMP) ON CONFLICT(id) DO UPDATE SET data=excluded.data, updated_at=CURRENT_TIMESTAMP").bind(JSON.stringify(clean)).run();
+    return json({ ok: true, settings: clean });
+  }
+
 
   if (path === "/api/categories" && method === "GET") {
     const result = await env.DB.prepare("SELECT id, name, slug, sort_order FROM categories ORDER BY sort_order, name").all();
