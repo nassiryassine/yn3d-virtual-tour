@@ -18,3 +18,26 @@ const menu=document.querySelector('.menu-toggle');if(menu){menu.addEventListener
     }).join('');
   }catch(error){grid.innerHTML='<div class="projects-loading">Projects could not be loaded. Please refresh the page.</div>';console.error(error);}
 })();
+
+
+// Subtle reveal-on-scroll motion; keeps the portfolio content and links intact.
+(function(){
+  const reduceMotion=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(reduceMotion)return;
+  const targets=document.querySelectorAll('.hero-copy,.hero-visual,.intro > *, .section-heading, .project-card, .tour-cta > *, footer > *');
+  if(!targets.length||!('IntersectionObserver' in window))return;
+  document.body.classList.add('reveal-ready');
+  targets.forEach((el,index)=>{
+    el.setAttribute('data-reveal','');
+    if(el.classList.contains('project-card'))el.style.setProperty('--reveal-delay',(index%2)*90+'ms');
+  });
+  const observer=new IntersectionObserver(entries=>{
+    entries.forEach(entry=>{
+      if(entry.isIntersecting){
+        entry.target.classList.add('is-visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  },{threshold:.12,rootMargin:'0px 0px -35px 0px'});
+  targets.forEach(el=>observer.observe(el));
+})();
