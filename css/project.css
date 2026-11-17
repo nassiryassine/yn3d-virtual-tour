@@ -92,3 +92,8 @@ body.panoee-viewer-open{overflow:hidden}
  .panoee-lightbox-header{height:42px;min-height:42px}
  .panoee-lightbox .panoee-embed-frame{height:calc(100vh - 42px)}
 }
+
+.panoee-tour-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:18px}
+.project-audio-player{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:22px;padding:12px 15px;border:1px solid #51432f;background:#111;color:#d5b47b;font-size:10px;letter-spacing:1.4px}
+.project-audio-player audio{width:min(100%,360px);height:34px}
+@media(max-width:650px){.project-audio-player{align-items:flex-start;flex-direction:column}.project-audio-player audio{width:100%}}
