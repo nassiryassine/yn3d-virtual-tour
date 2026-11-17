@@ -1,5 +1,36 @@
 const menu=document.querySelector('.menu-toggle');if(menu){menu.addEventListener('click',()=>{const nav=document.querySelector('.site-header nav');if(nav){nav.style.display=nav.style.display==='flex'?'none':'flex';nav.style.position='absolute';nav.style.top='75px';nav.style.right='6vw';nav.style.background='#171717';nav.style.padding='22px';nav.style.flexDirection='column';nav.style.zIndex='20';}})}
 
+
+// Load editable public-facing copy, hero image and brand logo.
+(async function loadSiteSettings(){
+  const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  try{
+    const response=await fetch('/api/public/settings',{headers:{'Accept':'application/json'}});
+    if(!response.ok)return;
+    const data=await response.json(),s=data.settings||{};
+    document.querySelectorAll('[data-setting]').forEach(el=>{
+      const key=el.dataset.setting;
+      if(Object.prototype.hasOwnProperty.call(s,key)&&s[key]!==null)el.textContent=s[key];
+    });
+    const title=(id,first,accent)=>{
+      const el=document.getElementById(id);if(!el)return;
+      if(s[first]!==undefined||s[accent]!==undefined){
+        const a=esc(s[first]??''),b=esc(s[accent]??'');
+        el.innerHTML=a+'<br><em>'+b+'</em>';
+      }
+    };
+    title('site-hero-title','heroTitle','heroAccent');
+    title('site-about-title','aboutTitle','aboutAccent');
+    title('site-portfolio-title','portfolioTitle','portfolioAccent');
+    title('site-tour-title','tourTitle','tourAccent');
+    if(s.heroImage){
+      const hero=document.querySelector('.hero-image');
+      if(hero)hero.style.backgroundImage='linear-gradient(0deg,rgba(0,0,0,.18),transparent),url("'+String(s.heroImage).replace(/["\\\\]/g,'')+'")';
+    }
+    if(s.logo)document.querySelectorAll('[data-site-logo]').forEach(img=>{img.src=s.logo;});
+  }catch(error){console.warn('Site settings could not be loaded.',error);}
+})();
+
 // Load published portfolio projects from the public Worker API.
 (async function loadPortfolioProjects(){
   const grid=document.getElementById('project-grid'); if(!grid)return;
