@@ -239,6 +239,16 @@ async function handleApi(request, env) {
     if (!image) return json({ error: "الصورة غير موجودة ضمن صور هذا المشروع." }, 404);
     const project = await env.DB.prepare("SELECT cover_image FROM projects WHERE id = ?").bind(projectId).first();
     await env.DB.prepare("DELETE FROM project_images WHERE id = ? AND project_id = ?").bind(imageId, projectId).run();
+    const tourRows=await env.DB.prepare("SELECT id, github_path FROM project_images WHERE project_id = ? AND image_type = 'externalTour'").bind(projectId).all();
+    for(const tour of tourRows.results||[]){
+      try{
+        const metadata=JSON.parse(tour.github_path||"");
+        if(metadata&&typeof metadata==="object"&&metadata.coverImage===image.image_url){
+          metadata.coverImage="";
+          await env.DB.prepare("UPDATE project_images SET github_path = ? WHERE id = ? AND project_id = ?").bind(JSON.stringify(metadata),tour.id,projectId).run();
+        }
+      }catch{}
+    }
     let coverImage = project ? project.cover_image : null;
     if (coverImage === image.image_url || image.image_type === "cover") {
       const next = await env.DB.prepare(
