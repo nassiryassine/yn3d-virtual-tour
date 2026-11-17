@@ -52,8 +52,8 @@
               <div class="field"><label for="projectOrder">ترتيب العرض</label><input id="projectOrder" type="number" value="0"></div>
               <div class="field full"><label for="projectImages">صور المشروع</label><input id="projectImages" type="file" accept="image/jpeg,image/png,image/webp" multiple><div class="hint">JPG أو PNG أو WEBP، بحد أقصى 20 ميجابايت للصورة. يمكنك اختيار صورة الغلاف من الصور الحالية أو الجديدة.</div><div id="savedProjectImages" class="image-grid"><div class="hint">احفظ المشروع أولاً لإضافة الصور.</div></div><div id="newProjectImagePreview" class="image-grid"></div></div>
               <div class="field full"><label for="projectVideos">روابط فيديوهات المشروع</label><textarea id="projectVideos" placeholder="ضع رابط كل فيديو في سطر مستقل (YouTube أو Vimeo أو Google Drive)"></textarea><div class="hint">أضف روابط YouTube أو Vimeo أو Google Drive، رابطاً واحداً في كل سطر. سيعمل الفيديو داخل صفحة مشروعك دون الانتقال إلى موقع المنصة. في Google Drive اجعل المشاركة متاحة لمن لديه الرابط.</div></div>
-              <div class="field full"><label for="projectTourSource">مصدر الجولة الافتراضية</label><select id="projectTourSource"><option value="internal">الجولة الداخلية (صور 360°)</option><option value="panoee">جولة خارجية من Panoee</option></select><div class="hint">اختر طريقة عرض الجولة في صفحة المشروع. الصور والجولات الداخلية المحفوظة لن تُحذف عند اختيار Panoee.</div></div>
-              <div class="field full"><label for="projectPanoeeUrl">رابط جولة Panoee</label><input id="projectPanoeeUrl" type="url" placeholder="https://tour.panoee.net/xxxxxxxxxxxxxxxxxxxxxxxx"><div class="hint">الصق رابط الجولة المنشورة من Panoee. سيُعرض المشهد داخل صفحة YN3D دون نقل الزائر إلى موقع آخر.</div></div>
+              <div class="field full"><label>جولات Panoee الخاصة بالمشروع</label><div id="panoeeTourRows"></div><button class="btn" type="button" id="addPanoeeTourButton">+ إضافة جولة</button><div class="hint">أضف جولة أو أكثر، واكتب المسمّى الذي تريد أن يظهر للزائر بجانب رابط كل جولة.</div></div>
+              <div class="field full"><label for="projectAudio">الصوت الخاص بالمشروع (MP3)</label><input id="projectAudio" type="file" accept="audio/mpeg,.mp3"><div id="savedProjectAudio" class="hint">لا يوجد صوت محفوظ لهذا المشروع.</div><label class="hint"><input id="removeProjectAudio" type="checkbox"> إزالة الصوت المحفوظ</label><div class="hint">ملف MP3 بحد أقصى 20 ميجابايت. يبدأ تشغيله عند فتح صفحة المشروع، ويمكن للزائر التحكم في الصوت.</div></div>
               <div class="field full"><label for="projectTourImages">صور الجولة الافتراضية 360°</label><input id="projectTourImages" type="file" accept="image/jpeg,image/png,image/webp" multiple><div class="hint">ارفع صور بانورامية حقيقية 360° بنسبة 2:1 (مثال 6000×3000). الصور العادية لن تعمل كجولة. الحد الأقصى 20MB للصورة.</div><div id="savedTourImages" class="panorama-admin-grid"><div class="hint">احفظ المشروع أولاً لإدارة مشاهد 360°.</div></div></div>
             </div>
             <div id="projectMessage" class="message"></div>
@@ -97,6 +97,13 @@ let selectedSavedCoverId = null;
 let selectedNewCoverIndex = null;
 let previewUrls = [];
 let savedTourImages = [];
+let savedProjectAudio = null;
+function addPanoeeTourRow(name='',url=''){
+ const row=document.createElement('div');row.className='panoee-admin-row';
+ row.innerHTML='<input class="panoee-tour-name" type="text" placeholder="مسمّى الجولة" value="'+escapeHtml(name)+'"><input class="panoee-tour-url" type="url" placeholder="https://tour.panoee.net/..." value="'+escapeHtml(url)+'"><button class="btn" type="button">حذف</button>';
+ row.querySelector('button').addEventListener('click',()=>row.remove());$('panoeeTourRows').appendChild(row);
+}
+function readPanoeeTours(){return Array.from($('panoeeTourRows').querySelectorAll('.panoee-admin-row')).map(row=>({name:row.querySelector('.panoee-tour-name').value.trim(),url:row.querySelector('.panoee-tour-url').value.trim()})).filter(t=>t.name||t.url);}
 
 function showMessage(id, message, type='error') {
   const el = $(id); el.textContent = message; el.className = 'message ' + type;
@@ -171,7 +178,7 @@ function renderSavedTourImages() {
 }
 function resetForm() {
   clearImagePreviews(); savedImages=[]; savedTourImages=[]; currentCoverImage=null; selectedSavedCoverId=null; selectedNewCoverIndex=null;
-  $('projectForm').reset(); $('projectId').value=''; $('projectOrder').value='0'; $('editorTitle').textContent='إضافة مشروع جديد'; $('saveProjectButton').textContent='حفظ المشروع'; $('projectVideos').value=''; $('projectTourImages').value=''; $('projectTourSource').value='internal'; $('projectPanoeeUrl').value=''; $('savedTourImages').innerHTML='<div class="hint">لا توجد مشاهد محفوظة بعد.</div>'; $('savedProjectImages').innerHTML='<div class="hint">احفظ المشروع أولاً لإضافة الصور.</div>'; renderCategoryOptions(); clearMessage('projectMessage');
+  $('projectForm').reset(); $('projectId').value=''; $('projectOrder').value='0'; $('editorTitle').textContent='إضافة مشروع جديد'; $('saveProjectButton').textContent='حفظ المشروع'; $('projectVideos').value=''; $('projectTourImages').value=''; $('panoeeTourRows').innerHTML=''; addPanoeeTourRow(); $('projectAudio').value=''; $('removeProjectAudio').checked=false; savedProjectAudio=null; $('savedProjectAudio').textContent='لا يوجد صوت محفوظ لهذا المشروع.'; $('savedTourImages').innerHTML='<div class="hint">لا توجد مشاهد محفوظة بعد.</div>'; $('savedProjectImages').innerHTML='<div class="hint">احفظ المشروع أولاً لإضافة الصور.</div>'; renderCategoryOptions(); clearMessage('projectMessage');
 }
 async function editProject(id) {
   const p=projects.find(x=>Number(x.id)===Number(id)); if(!p)return;
@@ -179,15 +186,16 @@ async function editProject(id) {
   $('projectLocation').value=p.location||''; $('projectDescription').value=p.description||'';
   $('projectStatus').value=p.status||'draft'; $('projectOrder').value=p.sort_order||0;
   renderCategoryOptions(p.category_id); $('projectImages').value='';
-  $('projectVideos').value=''; $('projectTourImages').value=''; $('savedTourImages').textContent='جارٍ تحميل المشاهد المحفوظة...';
+  $('projectVideos').value=''; $('projectTourImages').value=''; $('projectAudio').value=''; $('removeProjectAudio').checked=false; $('savedProjectAudio').textContent='جارٍ تحميل الصوت المحفوظ...'; $('panoeeTourRows').innerHTML=''; $('savedTourImages').textContent='جارٍ تحميل المشاهد المحفوظة...';
   $('editorTitle').textContent='تعديل المشروع'; $('saveProjectButton').textContent='حفظ التعديلات';
   clearMessage('projectMessage'); $('editorPanel').scrollIntoView({behavior:'smooth',block:'start'});
   try {
     const media = await api('/projects/'+id+'/media');
     $('projectVideos').value=(media.media||[]).filter(x=>x.image_type==='video').map(x=>x.image_url).join('\n');
-    const panoeeTour=(media.media||[]).find(x=>x.image_type==='externalTour');
-    $('projectTourSource').value=panoeeTour?'panoee':'internal';
-    $('projectPanoeeUrl').value=panoeeTour?panoeeTour.image_url:'';
+    const panoeeTours=(media.media||[]).filter(x=>x.image_type==='externalTour');
+    if(panoeeTours.length) panoeeTours.forEach((tour,index)=>addPanoeeTourRow(tour.github_path&&!tour.github_path.startsWith('external-panoee-tour-')?tour.github_path:'جولة '+(index+1),tour.image_url)); else addPanoeeTourRow();
+    savedProjectAudio=(media.media||[]).find(x=>x.image_type==='projectAudio')||null;
+    $('savedProjectAudio').textContent=savedProjectAudio?'الصوت المحفوظ: '+(savedProjectAudio.github_path||'ملف MP3'):'لا يوجد صوت محفوظ لهذا المشروع.';
     savedImages=(media.media||[]).filter(x=>['cover','gallery','image'].includes(x.image_type));
     currentCoverImage=media.cover_image||p.cover_image||null;
     const cover=savedImages.find(x=>x.image_url===currentCoverImage)||savedImages.find(x=>x.image_type==='cover');
@@ -262,6 +270,7 @@ $('projectList').addEventListener('click',async e=>{
     catch(err){alert(err.message);del.disabled=false;}
   }
 });
+$('addPanoeeTourButton').addEventListener('click',()=>addPanoeeTourRow());
 $('projectForm').addEventListener('submit',async e=>{
   e.preventDefault(); if(busy)return; clearMessage('projectMessage'); setBusy(true,'saveProjectButton');
   try{
@@ -271,7 +280,17 @@ $('projectForm').addEventListener('submit',async e=>{
     if(id){await api('/projects/'+id,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});saved={id:Number(id)};}
     else saved=await api('/projects',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
     const mediaLines=fieldId=>$(fieldId).value.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
-    await api('/projects/'+saved.id+'/media',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({videos:mediaLines('projectVideos'),tourSource:$('projectTourSource').value,panoeeUrl:$('projectPanoeeUrl').value.trim()})});
+    const panoeeTours=readPanoeeTours();
+    if(panoeeTours.some(t=>!t.name||!t.url)) throw new Error('أدخل مسمّى ورابطاً لكل جولة Panoee، أو احذف السطر الفارغ.');
+    await api('/projects/'+saved.id+'/media',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({videos:mediaLines('projectVideos'),panoeeTours})});
+    const audioFile=$('projectAudio').files[0];
+    if($('removeProjectAudio').checked&&savedProjectAudio) await api('/projects/'+saved.id+'/audio',{method:'DELETE'});
+    if(audioFile){
+      if(audioFile.type!=='audio/mpeg'&&!/\.mp3$/i.test(audioFile.name)) throw new Error('يرجى اختيار ملف MP3 فقط.');
+      if(audioFile.size>20*1024*1024) throw new Error('حجم ملف الصوت يتجاوز 20 ميجابايت.');
+      const audioForm=new FormData();audioForm.append('file',audioFile);audioForm.append('project_id',String(saved.id));audioForm.append('image_type','projectAudio');
+      await api('/upload',{method:'POST',body:audioForm});
+    }
     const files=Array.from($('projectImages').files||[]);
     const tourFiles=Array.from($('projectTourImages').files||[]);
     const uploadedImages=[];
