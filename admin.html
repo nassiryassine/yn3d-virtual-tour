@@ -32,6 +32,49 @@
       <div class="top-actions"><a class="btn" href="/" style="text-decoration:none">عرض الموقع ↗</a><button class="btn" id="logoutButton">تسجيل الخروج</button></div>
     </header>
     <section class="welcome"><div><h1>مرحباً بك 👋</h1><div class="muted">إدارة المشاريع والتصنيفات والصور</div></div><button class="btn primary" id="newProjectButton">＋ مشروع جديد</button></section>
+    <section class="panel" id="siteSettingsPanel" style="margin-bottom:24px">
+      <h2>إعدادات الموقع والهوية</h2>
+      <p class="hint">عدّل النصوص التي تظهر في الواجهة، واختر صورة الواجهة والشعار. تُحفظ الإعدادات وتظهر للزوار بعد الحفظ.</p>
+      <form id="siteSettingsForm">
+        <div class="form-grid">
+          <div class="field"><label for="settingHeroEyebrow">النص الصغير أعلى العنوان</label><input id="settingHeroEyebrow" maxlength="160"></div>
+          <div class="field"><label for="settingHeroTitle">العنوان الرئيسي</label><input id="settingHeroTitle" maxlength="160"></div>
+          <div class="field"><label for="settingHeroAccent">الكلمة المميزة باللون البرتقالي</label><input id="settingHeroAccent" maxlength="100"></div>
+          <div class="field full"><label for="settingHeroText">الوصف أسفل العنوان</label><textarea id="settingHeroText" maxlength="500"></textarea></div>
+          <div class="field"><label for="settingNavProjects">رابط المشاريع</label><input id="settingNavProjects" maxlength="60"></div>
+          <div class="field"><label for="settingNavAbout">رابط نبذة عنا</label><input id="settingNavAbout" maxlength="60"></div>
+          <div class="field"><label for="settingNavContact">رابط التواصل</label><input id="settingNavContact" maxlength="60"></div>
+          <div class="field"><label for="settingAboutEyebrow">عنوان قسم النبذة الصغير</label><input id="settingAboutEyebrow" maxlength="120"></div>
+          <div class="field"><label for="settingAboutTitle">عنوان قسم النبذة</label><input id="settingAboutTitle" maxlength="160"></div>
+          <div class="field"><label for="settingAboutAccent">العبارة المميزة في قسم النبذة</label><input id="settingAboutAccent" maxlength="160"></div>
+          <div class="field full"><label for="settingAboutText">نص قسم النبذة</label><textarea id="settingAboutText" maxlength="500"></textarea></div>
+          <div class="field"><label for="settingPortfolioEyebrow">العنوان الصغير لقسم المشاريع</label><input id="settingPortfolioEyebrow" maxlength="120"></div>
+          <div class="field"><label for="settingPortfolioTitle">عنوان قسم المشاريع</label><input id="settingPortfolioTitle" maxlength="120"></div>
+          <div class="field"><label for="settingPortfolioAccent">الكلمة المميزة في عنوان المشاريع</label><input id="settingPortfolioAccent" maxlength="100"></div>
+          <div class="field"><label for="settingTourEyebrow">العنوان الصغير لقسم الجولة</label><input id="settingTourEyebrow" maxlength="120"></div>
+          <div class="field"><label for="settingTourTitle">عنوان قسم الجولة</label><input id="settingTourTitle" maxlength="120"></div>
+          <div class="field"><label for="settingTourAccent">الكلمة المميزة في عنوان الجولة</label><input id="settingTourAccent" maxlength="100"></div>
+          <div class="field full"><label for="settingTourText">وصف قسم الجولة</label><textarea id="settingTourText" maxlength="500"></textarea></div>
+          <div class="field"><label for="settingTourButton">نص زر الجولة</label><input id="settingTourButton" maxlength="100"></div>
+          <div class="field"><label for="settingFooterText">النص في أسفل الموقع</label><input id="settingFooterText" maxlength="180"></div>
+          <div class="field"><label for="settingFooterCopyright">حقوق الموقع</label><input id="settingFooterCopyright" maxlength="180"></div>
+          <div class="field full">
+            <label for="settingHeroImage">الصورة الرئيسية أعلى الموقع</label>
+            <input id="settingHeroImage" type="file" accept="image/jpeg,image/png,image/webp">
+            <div class="hint">JPG أو PNG أو WEBP، بحد أقصى 20 ميجابايت. اتركه فارغاً للاحتفاظ بالصورة الحالية.</div>
+            <img id="settingHeroImagePreview" alt="معاينة صورة الواجهة" style="display:none;width:100%;max-height:220px;object-fit:cover;border-radius:10px;margin-top:8px">
+          </div>
+          <div class="field full">
+            <label for="settingLogo">شعار الموقع</label>
+            <input id="settingLogo" type="file" accept="image/jpeg,image/png,image/webp,image/svg+xml">
+            <div class="hint">يمكنك رفع شعار PNG شفاف أو JPG أو WEBP. الحد الأقصى 20 ميجابايت. اتركه فارغاً للاحتفاظ بالشعار الحالي.</div>
+            <div style="background:#090604;border:1px solid var(--line);border-radius:10px;padding:14px;margin-top:8px"><img id="settingLogoPreview" alt="معاينة الشعار" style="display:block;max-width:220px;max-height:130px;object-fit:contain;margin:auto"></div>
+          </div>
+        </div>
+        <div id="siteSettingsMessage" class="message"></div>
+        <div class="form-actions"><button class="btn primary" id="saveSiteSettingsButton" type="submit">حفظ إعدادات الموقع</button></div>
+      </form>
+    </section>
     <div class="stats">
       <div class="stat"><span>إجمالي المشاريع</span><strong id="totalProjects">—</strong></div>
       <div class="stat"><span>مشاريع منشورة</span><strong id="publishedProjects">—</strong></div>
@@ -147,10 +190,49 @@ async function checkSession() {
   try { await api('/me'); showDashboard(); await refreshAll(); }
   catch { showLogin(); }
 }
+
+const siteSettingDefaults = {"heroEyebrow":"INDEPENDENT 3D DESIGNER · RIYADH","heroTitle":"DESIGN","heroAccent":"YOUR VISION.","heroText":"Architectural visualization that turns ideas into immersive experiences.","navProjects":"PROJECTS","navAbout":"ABOUT","navContact":"CONTACT","aboutEyebrow":"01 — THE APPROACH","aboutTitle":"Spaces are not just seen.","aboutAccent":"They are experienced.","aboutText":"Architectural imagery, detailed environments and interactive 360° tours — created to help clients understand and feel every space before it is built.","portfolioEyebrow":"02 — PORTFOLIO","portfolioTitle":"SELECTED","portfolioAccent":"PROJECTS","tourEyebrow":"GO BEYOND THE IMAGE","tourTitle":"STEP INSIDE","tourAccent":"THE DESIGN.","tourText":"Explore architectural spaces through immersive 360° virtual tours.","tourButton":"LAUNCH VIRTUAL TOUR","footerText":"CRAFTED WITH VISION · RIYADH, SAUDI ARABIA","footerCopyright":"© 2026 YASSINE NASSIR"};
+let currentSiteSettings = {};
+function applySettingsToForm(settings={}) {
+  currentSiteSettings={...siteSettingDefaults,...settings};
+  const fields={heroEyebrow:'settingHeroEyebrow',heroTitle:'settingHeroTitle',heroAccent:'settingHeroAccent',heroText:'settingHeroText',navProjects:'settingNavProjects',navAbout:'settingNavAbout',navContact:'settingNavContact',aboutEyebrow:'settingAboutEyebrow',aboutTitle:'settingAboutTitle',aboutAccent:'settingAboutAccent',aboutText:'settingAboutText',portfolioEyebrow:'settingPortfolioEyebrow',portfolioTitle:'settingPortfolioTitle',portfolioAccent:'settingPortfolioAccent',tourEyebrow:'settingTourEyebrow',tourTitle:'settingTourTitle',tourAccent:'settingTourAccent',tourText:'settingTourText',tourButton:'settingTourButton',footerText:'settingFooterText',footerCopyright:'settingFooterCopyright'};
+  Object.entries(fields).forEach(([key,id])=>$(id).value=currentSiteSettings[key]??siteSettingDefaults[key]??'');
+  $('settingHeroImagePreview').src=currentSiteSettings.heroImage||'';
+  $('settingHeroImagePreview').style.display=currentSiteSettings.heroImage?'block':'none';
+  $('settingLogoPreview').src=currentSiteSettings.logo||'/assets/3dyn-moroccan-logo.svg';
+}
+async function loadSiteSettings(){try{const data=await api('/settings');applySettingsToForm(data.settings||{});}catch(err){showMessage('siteSettingsMessage','تعذر تحميل إعدادات الموقع: '+err.message);}}
+function previewSettingFile(inputId,previewId){$(inputId).addEventListener('change',()=>{const file=$(inputId).files[0];if(!file)return;const url=URL.createObjectURL(file);$(previewId).src=url;$(previewId).style.display='block';});}
+previewSettingFile('settingHeroImage','settingHeroImagePreview');
+previewSettingFile('settingLogo','settingLogoPreview');
+async function uploadSiteAsset(file){
+  if(!file)return '';
+  if(file.size>20*1024*1024)throw new Error('حجم الملف يتجاوز 20 ميجابايت.');
+  const allowed=['image/jpeg','image/png','image/webp','image/svg+xml'];
+  if(!allowed.includes(file.type)&&!(/\.svg$/i.test(file.name)))throw new Error('صيغة الصورة غير مدعومة.');
+  const form=new FormData();form.append('file',file);form.append('project_id','general');form.append('image_type','image');
+  const result=await api('/upload',{method:'POST',body:form});return result.url;
+}
+$('siteSettingsForm').addEventListener('submit',async e=>{
+  e.preventDefault();if(busy)return;clearMessage('siteSettingsMessage');setBusy(true,'saveSiteSettingsButton');
+  try{
+    const fields={heroEyebrow:'settingHeroEyebrow',heroTitle:'settingHeroTitle',heroAccent:'settingHeroAccent',heroText:'settingHeroText',navProjects:'settingNavProjects',navAbout:'settingNavAbout',navContact:'settingNavContact',aboutEyebrow:'settingAboutEyebrow',aboutTitle:'settingAboutTitle',aboutAccent:'settingAboutAccent',aboutText:'settingAboutText',portfolioEyebrow:'settingPortfolioEyebrow',portfolioTitle:'settingPortfolioTitle',portfolioAccent:'settingPortfolioAccent',tourEyebrow:'settingTourEyebrow',tourTitle:'settingTourTitle',tourAccent:'settingTourAccent',tourText:'settingTourText',tourButton:'settingTourButton',footerText:'settingFooterText',footerCopyright:'settingFooterCopyright'};
+    const settings={...currentSiteSettings};Object.entries(fields).forEach(([key,id])=>settings[key]=$(id).value.trim());
+    const heroFile=$('settingHeroImage').files[0],logoFile=$('settingLogo').files[0];
+    if(heroFile)settings.heroImage=await uploadSiteAsset(heroFile);
+    if(logoFile)settings.logo=await uploadSiteAsset(logoFile);
+    const result=await api('/settings',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({settings})});
+    applySettingsToForm(result.settings||settings);$('settingHeroImage').value='';$('settingLogo').value='';
+    showMessage('siteSettingsMessage','تم حفظ إعدادات الموقع بنجاح.','success');
+  }catch(err){showMessage('siteSettingsMessage','تعذر حفظ الإعدادات: '+err.message);}
+  finally{setBusy(false,'saveSiteSettingsButton');}
+});
+
 async function refreshAll() {
   const [p,c]=await Promise.all([api('/projects'),api('/categories')]);
   projects=p.projects||[]; categories=c.categories||[];
   renderProjects(); renderCategories(); renderCategoryOptions();
+  await loadSiteSettings();
   $('totalProjects').textContent=projects.length;
   $('publishedProjects').textContent=projects.filter(x=>x.status==='published').length;
   $('totalCategories').textContent=categories.length;
