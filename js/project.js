@@ -108,6 +108,11 @@
    }catch{return '';}
   };
   let motionStarted=false,frameReady=false;
+  const relayParentMotion=event=>{
+   if(!frameReady||!event.data||event.data.type!=='devicemotion'||event.source!==window.parent||!frame.contentWindow)return;
+   try{frame.contentWindow.postMessage(event.data,panoeeOrigin);}catch(error){console.warn('Panoee parent motion bridge:',error);}
+  };
+  window.addEventListener('message',relayParentMotion,false);
   const relayMotion=event=>{
    if(!motionStarted||!frameReady||!frame.contentWindow)return;
    const vector=value=>value?{x:Number.isFinite(value.x)?value.x:null,y:Number.isFinite(value.y)?value.y:null,z:Number.isFinite(value.z)?value.z:null}:null;
@@ -164,6 +169,7 @@
    document.body.classList.remove('panoee-viewer-open');
    motionStarted=false;
    window.removeEventListener('devicemotion',relayMotion);
+   frameReady=false;
    frame.src='about:blank';
    if(document.fullscreenElement&&document.exitFullscreen){try{await document.exitFullscreen();}catch{}}
   };
