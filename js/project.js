@@ -93,6 +93,7 @@
   const activeTitle=document.getElementById('panoee-active-tour-title');
   if(!modal||!frame||!openButtons.length||!panel)return;
   const panoeeOrigin='https://tour.panoee.net';
+  const panoeeEmbedFor=t=>{try{const u=new URL(t.image_url),id=u.pathname.split('/').filter(Boolean).pop();if(!id)return '';return u.pathname.startsWith('/iframe/')?u.href:'https://tour.panoee.net/iframe/'+encodeURIComponent(id)+'?embedFullscreen=1&embedVr=1&embedGyro=1';}catch{return '';}};
   let motionStarted=false,frameReady=false;
   const relayMotion=event=>{
    if(!motionStarted||!frameReady||!frame.contentWindow)return;
