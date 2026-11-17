@@ -31,3 +31,11 @@ body.pano-viewer-open{overflow:hidden}
  .pano-lightbox .virtual-pano{height:calc(100vh - 180px);min-height:260px}
  .pano-lightbox .virtual-tour-toolbar{padding:10px}
 }
+
+/* Dark, stable first-frame treatment for the 360° viewer */
+#virtual-pano{background:#080808!important;isolation:isolate}
+#virtual-pano canvas{background:#080808!important}
+#virtual-pano .pano-loading{position:absolute;inset:0;z-index:5;min-height:0;height:auto;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;padding:24px;background:radial-gradient(ellipse at center,#171717 0%,#090909 72%);color:#d2c3a8;font-size:12px;letter-spacing:.4px;text-align:center}
+#virtual-pano .pano-loading:before{content:"";width:28px;height:28px;border:2px solid #343434;border-top-color:#c6a56b;border-radius:50%;animation:yn3d-pano-spin .8s linear infinite}
+#virtual-pano .pano-loading[hidden]{display:none!important}
+@keyframes yn3d-pano-spin{to{transform:rotate(360deg)}}
