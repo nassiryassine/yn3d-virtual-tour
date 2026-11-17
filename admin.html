@@ -114,6 +114,15 @@ function addPanoeeTourRow(name='',url='',type='panoee',coverImage=''){
  row.querySelector('button').addEventListener('click',()=>row.remove());$('panoeeTourRows').appendChild(row);
 }
 function readPanoeeTours(){return Array.from($('panoeeTourRows').querySelectorAll('.panoee-admin-row')).map(row=>({type:row.querySelector('.panoee-tour-type').value,name:row.querySelector('.panoee-tour-name').value.trim(),url:row.querySelector('.panoee-tour-url').value.trim(),coverImage:row.querySelector('.panoee-tour-cover-select').value})).filter(t=>t.name||t.url);}
+function refreshPanoeeTourCoverOptions(){
+ $('panoeeTourRows').querySelectorAll('.panoee-admin-row').forEach(row=>{
+  const select=row.querySelector('.panoee-tour-cover-select'),preview=row.querySelector('.panoee-tour-cover-preview');
+  const previous=select.value;
+  select.innerHTML='<option value="">استخدم غلاف المشروع</option>'+savedImages.map(img=>'<option value="'+escapeHtml(img.image_url)+'">'+escapeHtml('صورة محفوظة '+img.id)+'</option>').join('');
+  select.value=savedImages.some(img=>img.image_url===previous)?previous:'';
+  const chosen=select.value||currentCoverImage||'';preview.src=chosen;preview.hidden=!chosen;
+ });
+}
 
 function showMessage(id, message, type='error') {
   const el = $(id); el.textContent = message; el.className = 'message ' + type;
@@ -237,6 +246,7 @@ $('savedProjectImages').addEventListener('click',async e=>{
   try{
     const result=await api('/projects/'+$('projectId').value+'/images/'+imageId,{method:'DELETE'});
     savedImages=result.images||[];currentCoverImage=result.cover_image||null;
+    refreshPanoeeTourCoverOptions();
     const cover=savedImages.find(x=>x.image_url===currentCoverImage)||savedImages.find(x=>x.image_type==='cover');
     selectedSavedCoverId=cover?cover.id:null;selectedNewCoverIndex=null;
     renderSavedProjectImages();
