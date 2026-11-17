@@ -28,6 +28,7 @@ const menu=document.querySelector('.menu-toggle');if(menu){menu.addEventListener
       if(hero)hero.style.backgroundImage='linear-gradient(0deg,rgba(0,0,0,.18),transparent),url("'+String(s.heroImage).replace(/["\\\\]/g,'')+'")';
     }
     if(s.logo)document.querySelectorAll('[data-site-logo]').forEach(img=>{img.src=s.logo;});
+    if(s.contactWhatsapp){const number=String(s.contactWhatsapp).replace(/\\D/g,'');if(number)document.querySelectorAll('[data-whatsapp-link]').forEach(link=>link.href='https://wa.me/'+number);}
   }catch(error){console.warn('Site settings could not be loaded.',error);}
 })();
 
