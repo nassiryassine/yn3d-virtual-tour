@@ -418,7 +418,7 @@ async function handleApi(request, env) {
     const file = form.get("file");
     if (!file || typeof file.arrayBuffer !== "function") return json({ error: "اختر ملفاً أولاً." }, 400);
     const isProjectAudio=String(form.get("image_type")||"")==="projectAudio";
-    if(isProjectAudio?(file.type!=="audio/mpeg"&&!/\.mp3$/i.test(file.name||"")):!["image/jpeg","image/png","image/webp"].includes(file.type)){
+    if(isProjectAudio?(file.type!=="audio/mpeg"&&!/\.mp3$/i.test(file.name||"")):!["image/jpeg","image/png","image/webp","image/svg+xml"].includes(file.type)){
       return json({error:isProjectAudio?"يرجى رفع ملف MP3 فقط.":"الصيغ المدعومة هي JPG وPNG وWEBP فقط."},415);
     }
     if (file.size > MAX_UPLOAD_BYTES) return json({ error: "حجم الملف يتجاوز 20 ميجابايت. قلّل حجمه ثم أعد المحاولة." }, 413);
