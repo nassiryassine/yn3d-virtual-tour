@@ -283,6 +283,8 @@ async function handleApi(request, env) {
     return json({ ok: true });
   }
 
+  const projectAudioMatch=path.match(/^\/api\/projects\/(\d+)\/audio$/);
+  if(projectAudioMatch&&method==="DELETE"){const projectId=Number(projectAudioMatch[1]);await env.DB.prepare("DELETE FROM project_images WHERE project_id = ? AND image_type = 'projectAudio'").bind(projectId).run();return json({ok:true});}
   const projectMediaMatch = path.match(/^\/api\/projects\/(\d+)\/media$/);
   if (projectMediaMatch && method === "GET") {
     const projectId = Number(projectMediaMatch[1]);
@@ -314,25 +316,19 @@ async function handleApi(request, env) {
         "INSERT INTO project_images (project_id, github_path, image_url, image_type, sort_order) VALUES (?, ?, ?, ?, ?)"
       ).bind(projectId, "external-video-" + projectId + "-" + i, value, "video", i).run();
     }
-    // Store the optional Panoee tour in the existing media table; never touch internal panoramas.
-    if (Object.prototype.hasOwnProperty.call(body, "tourSource")) {
-      const tourSource = body.tourSource === "panoee" ? "panoee" : "internal";
-      const panoeeUrl = String(body.panoeeUrl || "").trim();
-      let savedTourUrl = "";
-      if (tourSource === "panoee") {
-        let parsed;
-        try { parsed = new URL(panoeeUrl); } catch { return json({ error: "رابط Panoee غير صالح." }, 400); }
-        if (parsed.protocol !== "https:" || parsed.hostname !== "tour.panoee.net" || !/^\/[A-Za-z0-9_-]+(?:\/.*)?$/.test(parsed.pathname)) {
-          return json({ error: "يرجى إدخال رابط جولة صحيح من tour.panoee.net." }, 400);
-        }
-        savedTourUrl = parsed.href;
+    if (Object.prototype.hasOwnProperty.call(body,"panoeeTours") || Object.prototype.hasOwnProperty.call(body,"tourSource")) {
+      let tours=Array.isArray(body.panoeeTours)?body.panoeeTours:[];
+      if(!Object.prototype.hasOwnProperty.call(body,"panoeeTours")&&body.tourSource==="panoee"&&body.panoeeUrl)tours=[{name:"جولة 1",url:body.panoeeUrl}];
+      const normalized=[];
+      for(const item of tours){
+        const name=String(item?.name||"").trim(),value=String(item?.url||"").trim();
+        if(!name||!value)return json({error:"يرجى إدخال مسمّى ورابط لكل جولة."},400);
+        let parsed;try{parsed=new URL(value);}catch{return json({error:"رابط Panoee غير صالح."},400);}
+        if(parsed.protocol!=="https:"||parsed.hostname!=="tour.panoee.net"||!/^\/[A-Za-z0-9_-]+(?:\/.*)?$/.test(parsed.pathname))return json({error:"يرجى إدخال رابط جولة صحيح من tour.panoee.net."},400);
+        normalized.push({name,url:parsed.href});
       }
       await env.DB.prepare("DELETE FROM project_images WHERE project_id = ? AND image_type = 'externalTour'").bind(projectId).run();
-      if (savedTourUrl) {
-        await env.DB.prepare(
-          "INSERT INTO project_images (project_id, github_path, image_url, image_type, sort_order) VALUES (?, ?, ?, ?, ?)"
-        ).bind(projectId, "external-panoee-tour-" + projectId, savedTourUrl, "externalTour", 0).run();
-      }
+      for(let i=0;i<normalized.length;i++)await env.DB.prepare("INSERT INTO project_images (project_id, github_path, image_url, image_type, sort_order) VALUES (?, ?, ?, ?, ?)").bind(projectId,normalized[i].name,normalized[i].url,"externalTour",i).run();
     }
     return json({ ok: true });
   }
@@ -371,13 +367,14 @@ async function handleApi(request, env) {
     const form = await request.formData();
     const file = form.get("file");
     if (!file || typeof file.arrayBuffer !== "function") return json({ error: "اختر صورة أولاً." }, 400);
-    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
-      return json({ error: "الصيغ المدعومة هي JPG وPNG وWEBP فقط." }, 415);
+    const isProjectAudio=String(form.get("image_type")||"")==="projectAudio";
+    if(isProjectAudio?(file.type!=="audio/mpeg"&&!/\.mp3$/i.test(file.name||"")):!["image/jpeg","image/png","image/webp"].includes(file.type)){
+      return json({error:isProjectAudio?"يرجى رفع ملف MP3 فقط.":"الصيغ المدعومة هي JPG وPNG وWEBP فقط."},415);
     }
     if (file.size > MAX_UPLOAD_BYTES) return json({ error: "حجم الصورة يتجاوز 20 ميجابايت. قلّل حجمها ثم أعد المحاولة." }, 413);
     const projectId = String(form.get("project_id") || "general").replace(/[^0-9]/g, "") || "general";
     const requestedType = String(form.get("image_type") || "image");
-    const allowedTypes = ["image", "cover", "gallery", "tour360"];
+    const allowedTypes = ["image", "cover", "gallery", "tour360", "projectAudio"];
     if (!allowedTypes.includes(requestedType)) return json({ error: "نوع الصورة غير مسموح." }, 400);
     const imageType = requestedType;
     const bytes = new Uint8Array(await file.arrayBuffer());
@@ -414,6 +411,7 @@ async function handleApi(request, env) {
       ? githubFile.download_url
       : "https://raw.githubusercontent.com/" + env.GITHUB_REPO + "/" + env.GITHUB_BRANCH + "/" + repoPath;
     if (projectId !== "general") {
+      if(imageType==="projectAudio")await env.DB.prepare("DELETE FROM project_images WHERE project_id = ? AND image_type = 'projectAudio'").bind(Number(projectId)).run();
       const inserted = await env.DB.prepare(
         "INSERT INTO project_images (project_id, github_path, image_url, image_type, sort_order) VALUES (?, ?, ?, ?, ?)"
       ).bind(Number(projectId), repoPath, rawUrl, imageType, 0).run();
