@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 460" role="img" aria-labelledby="title desc">
+<title id="title">3DYN Moroccan heritage design</title><desc id="desc">Octagonal Moroccan zellij inspired emblem with gold and emerald details and 3DYN lettering.</desc>
+<defs>
+ <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff0bd"/><stop offset=".35" stop-color="#c69a4d"/><stop offset=".7" stop-color="#f4d58a"/><stop offset="1" stop-color="#795022"/></linearGradient>
+ <linearGradient id="green" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#0c5148"/><stop offset=".5" stop-color="#14766a"/><stop offset="1" stop-color="#062d2b"/></linearGradient>
+ <filter id="shadow" x="-30%" y="-30%" width="160%" height="170%"><feGaussianBlur in="SourceAlpha" stdDeviation="8"/><feOffset dy="9"/><feComponentTransfer><feFuncA type="linear" slope=".55"/></feComponentTransfer><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+ <pattern id="zellij" width="46" height="46" patternUnits="userSpaceOnUse"><rect width="46" height="46" fill="#0a3833"/><path d="M23 2 44 23 23 44 2 23Z" fill="none" stroke="#d4b36d" stroke-width="2"/><path d="M23 9 37 23 23 37 9 23Z" fill="none" stroke="#2e9a83" stroke-width="2"/><path d="M23 14 28 23 23 32 18 23Z" fill="#b77b39"/><circle cx="23" cy="23" r="3" fill="#f1d89b"/></pattern>
+ <clipPath id="band"><path d="M175 67H445L520 142V318L445 393H175L100 318V142Z"/></clipPath>
+</defs>
+<g filter="url(#shadow)">
+ <path d="M180 35H440L555 150V310L440 425H180L65 310V150Z" fill="#101713" stroke="url(#gold)" stroke-width="12"/>
+ <path d="M188 53H432L537 158V302L432 407H188L83 302V158Z" fill="none" stroke="#e6cc91" stroke-width="3"/>
+ <g clip-path="url(#band)"><rect x="65" y="35" width="490" height="390" fill="url(#zellij)"/></g>
+ <path d="M180 112H440L480 152V308L440 348H180L140 308V152Z" fill="#111c18" stroke="url(#gold)" stroke-width="8"/>
+ <path d="M191 126H429L466 163V297L429 334H191L154 297V163Z" fill="#071512" stroke="#a47d43" stroke-width="2"/>
+ <text x="310" y="270" text-anchor="middle" font-family="Georgia,serif" font-size="116" font-weight="bold" letter-spacing="-8" fill="#0b2d29" stroke="url(#gold)" stroke-width="3">3DYN</text>
+ <text x="310" y="310" text-anchor="middle" font-family="Arial,sans-serif" font-size="17" letter-spacing="4" fill="#e7c98c">MOROCCO · HERITAGE · DESIGN</text>
+</g></svg>
