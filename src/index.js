@@ -107,9 +107,9 @@ async function githubRequest(env, path, options = {}) {
 async function ensureSiteSettingsTable(db) {
   await db.prepare("CREATE TABLE IF NOT EXISTS site_settings (setting_key TEXT PRIMARY KEY, setting_value TEXT NOT NULL DEFAULT '', updated_at TEXT DEFAULT CURRENT_TIMESTAMP)").run();
 
-  // Upgrade an older D1 table in place; preserve all existing settings.
-  const info = await db.prepare("PRAGMA table_info(site_settings)").all();
-  const columns = new Set((info.results || []).map(column => column.name));
+  // Upgrade older D1 layouts in place; preserve legacy columns and their constraints.
+  let info = await db.prepare("PRAGMA table_info(site_settings)").all();
+  let columns = new Set((info.results || []).map(column => column.name));
   if (!columns.has("setting_key")) {
     await db.prepare("ALTER TABLE site_settings ADD COLUMN setting_key TEXT").run();
   }
@@ -119,6 +119,8 @@ async function ensureSiteSettingsTable(db) {
   if (!columns.has("updated_at")) {
     await db.prepare("ALTER TABLE site_settings ADD COLUMN updated_at TEXT").run();
   }
+  info = await db.prepare("PRAGMA table_info(site_settings)").all();
+  return new Set((info.results || []).map(column => column.name));
 }
 async function handleApi(request, env) {
   const url = new URL(request.url);
@@ -199,9 +201,19 @@ async function handleApi(request, env) {
     const body = await request.json().catch(() => ({}));
     const videoUrl = String(body.hero_video_url || "").trim();
     if (videoUrl && !/^https:\/\//i.test(videoUrl)) return json({ error: "رابط فيديو الواجهة غير صالح." }, 400);
-    const updatedSetting = await env.DB.prepare("UPDATE site_settings SET setting_value = ?, updated_at = CURRENT_TIMESTAMP WHERE setting_key = 'hero_video_url'").bind(videoUrl).run();
+    const settingColumns = await ensureSiteSettingsTable(env.DB);
+    const hasLegacyData = settingColumns.has("data");
+    const updateSql = hasLegacyData
+      ? "UPDATE site_settings SET setting_value = ?, data = ?, updated_at = CURRENT_TIMESTAMP WHERE setting_key = 'hero_video_url'"
+      : "UPDATE site_settings SET setting_value = ?, updated_at = CURRENT_TIMESTAMP WHERE setting_key = 'hero_video_url'";
+    const updateValues = hasLegacyData ? [videoUrl, videoUrl] : [videoUrl];
+    const updatedSetting = await env.DB.prepare(updateSql).bind(...updateValues).run();
     if (!updatedSetting.meta || updatedSetting.meta.changes === 0) {
-      await env.DB.prepare("INSERT INTO site_settings (setting_key, setting_value, updated_at) VALUES ('hero_video_url', ?, CURRENT_TIMESTAMP)").bind(videoUrl).run();
+      const insertSql = hasLegacyData
+        ? "INSERT INTO site_settings (setting_key, setting_value, data, updated_at) VALUES ('hero_video_url', ?, ?, CURRENT_TIMESTAMP)"
+        : "INSERT INTO site_settings (setting_key, setting_value, updated_at) VALUES ('hero_video_url', ?, CURRENT_TIMESTAMP)";
+      const insertValues = hasLegacyData ? [videoUrl, videoUrl] : [videoUrl];
+      await env.DB.prepare(insertSql).bind(...insertValues).run();
     }
     return json({ ok: true, hero_video_url: videoUrl });
   }
