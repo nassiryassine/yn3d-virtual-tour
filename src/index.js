@@ -122,6 +122,22 @@ async function ensureSiteSettingsTable(db) {
   info = await db.prepare("PRAGMA table_info(site_settings)").all();
   return new Set((info.results || []).map(column => column.name));
 }
+async function getHeroVideoSetting(db, columns) {
+  if (columns.has("id") && columns.has("data")) {
+    const row = await db.prepare("SELECT setting_value, data FROM site_settings WHERE id = 1").first();
+    if (!row) return "";
+    if (row.setting_value) return String(row.setting_value);
+    try {
+      const legacy = JSON.parse(row.data || "{}");
+      return String(legacy.hero_video_url || "");
+    } catch {
+      return "";
+    }
+  }
+  const row = await db.prepare("SELECT setting_value FROM site_settings WHERE setting_key = 'hero_video_url' LIMIT 1").first();
+  return row ? String(row.setting_value || "") : "";
+}
+
 async function handleApi(request, env) {
   const url = new URL(request.url);
   const path = url.pathname;
@@ -163,9 +179,9 @@ async function handleApi(request, env) {
 
   // Public homepage settings used by the hero section.
   if (path === "/api/public/site-settings" && method === "GET") {
-    await ensureSiteSettingsTable(env.DB);
-    const row = await env.DB.prepare("SELECT setting_value FROM site_settings WHERE setting_key = 'hero_video_url'").first();
-    return json({ hero_video_url: row ? row.setting_value : "" });
+    const settingColumns = await ensureSiteSettingsTable(env.DB);
+    const heroVideoUrl = await getHeroVideoSetting(env.DB, settingColumns);
+    return json({ hero_video_url: heroVideoUrl });
   }
 
   // Public portfolio endpoints: only published projects are exposed.
@@ -193,27 +209,41 @@ async function handleApi(request, env) {
   if (path === "/api/me" && method === "GET") return json({ ok: true });
 
   if (path === "/api/site-settings" && (method === "GET" || method === "PUT")) {
-    await ensureSiteSettingsTable(env.DB);
+    const settingColumns = await ensureSiteSettingsTable(env.DB);
     if (method === "GET") {
-      const row = await env.DB.prepare("SELECT setting_value FROM site_settings WHERE setting_key = 'hero_video_url'").first();
-      return json({ hero_video_url: row ? row.setting_value : "" });
+      const heroVideoUrl = await getHeroVideoSetting(env.DB, settingColumns);
+      return json({ hero_video_url: heroVideoUrl });
     }
     const body = await request.json().catch(() => ({}));
     const videoUrl = String(body.hero_video_url || "").trim();
     if (videoUrl && !/^https:\/\//i.test(videoUrl)) return json({ error: "رابط فيديو الواجهة غير صالح." }, 400);
     const settingColumns = await ensureSiteSettingsTable(env.DB);
-    const hasLegacyData = settingColumns.has("data");
-    const updateSql = hasLegacyData
-      ? "UPDATE site_settings SET setting_value = ?, data = ?, updated_at = CURRENT_TIMESTAMP WHERE setting_key = 'hero_video_url'"
-      : "UPDATE site_settings SET setting_value = ?, updated_at = CURRENT_TIMESTAMP WHERE setting_key = 'hero_video_url'";
-    const updateValues = hasLegacyData ? [videoUrl, videoUrl] : [videoUrl];
-    const updatedSetting = await env.DB.prepare(updateSql).bind(...updateValues).run();
-    if (!updatedSetting.meta || updatedSetting.meta.changes === 0) {
-      const insertSql = hasLegacyData
-        ? "INSERT INTO site_settings (setting_key, setting_value, data, updated_at) VALUES ('hero_video_url', ?, ?, CURRENT_TIMESTAMP)"
-        : "INSERT INTO site_settings (setting_key, setting_value, updated_at) VALUES ('hero_video_url', ?, CURRENT_TIMESTAMP)";
-      const insertValues = hasLegacyData ? [videoUrl, videoUrl] : [videoUrl];
-      await env.DB.prepare(insertSql).bind(...insertValues).run();
+    if (settingColumns.has("id") && settingColumns.has("data")) {
+      // Legacy schema is a singleton row constrained to id = 1.
+      const existing = await env.DB.prepare("SELECT data FROM site_settings WHERE id = 1").first();
+      let legacyData = {};
+      if (existing && existing.data) {
+        try {
+          const parsed = JSON.parse(existing.data);
+          if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) legacyData = parsed;
+        } catch {
+          legacyData = {};
+        }
+      }
+      legacyData.hero_video_url = videoUrl;
+      const serialized = JSON.stringify(legacyData);
+      if (existing) {
+        await env.DB.prepare("UPDATE site_settings SET data = ?, setting_key = 'hero_video_url', setting_value = ?, updated_at = CURRENT_TIMESTAMP WHERE id = 1")
+          .bind(serialized, videoUrl).run();
+      } else {
+        await env.DB.prepare("INSERT INTO site_settings (id, data, setting_key, setting_value, updated_at) VALUES (1, ?, 'hero_video_url', ?, CURRENT_TIMESTAMP)")
+          .bind(serialized, videoUrl).run();
+      }
+    } else {
+      const updatedSetting = await env.DB.prepare("UPDATE site_settings SET setting_value = ?, updated_at = CURRENT_TIMESTAMP WHERE setting_key = 'hero_video_url'").bind(videoUrl).run();
+      if (!updatedSetting.meta || updatedSetting.meta.changes === 0) {
+        await env.DB.prepare("INSERT INTO site_settings (setting_key, setting_value, updated_at) VALUES ('hero_video_url', ?, CURRENT_TIMESTAMP)").bind(videoUrl).run();
+      }
     }
     return json({ ok: true, hero_video_url: videoUrl });
   }
