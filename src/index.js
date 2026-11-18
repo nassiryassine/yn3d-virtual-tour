@@ -104,6 +104,22 @@ async function githubRequest(env, path, options = {}) {
   return body;
 }
 
+async function ensureSiteSettingsTable(db) {
+  await db.prepare("CREATE TABLE IF NOT EXISTS site_settings (setting_key TEXT PRIMARY KEY, setting_value TEXT NOT NULL DEFAULT '', updated_at TEXT DEFAULT CURRENT_TIMESTAMP)").run();
+
+  // Upgrade an older D1 table in place; preserve all existing settings.
+  const info = await db.prepare("PRAGMA table_info(site_settings)").all();
+  const columns = new Set((info.results || []).map(column => column.name));
+  if (!columns.has("setting_key")) {
+    await db.prepare("ALTER TABLE site_settings ADD COLUMN setting_key TEXT").run();
+  }
+  if (!columns.has("setting_value")) {
+    await db.prepare("ALTER TABLE site_settings ADD COLUMN setting_value TEXT NOT NULL DEFAULT ''").run();
+  }
+  if (!columns.has("updated_at")) {
+    await db.prepare("ALTER TABLE site_settings ADD COLUMN updated_at TEXT").run();
+  }
+}
 async function handleApi(request, env) {
   const url = new URL(request.url);
   const path = url.pathname;
@@ -145,7 +161,7 @@ async function handleApi(request, env) {
 
   // Public homepage settings used by the hero section.
   if (path === "/api/public/site-settings" && method === "GET") {
-    await env.DB.prepare("CREATE TABLE IF NOT EXISTS site_settings (setting_key TEXT PRIMARY KEY, setting_value TEXT NOT NULL DEFAULT '', updated_at TEXT DEFAULT CURRENT_TIMESTAMP)").run();
+    await ensureSiteSettingsTable(env.DB);
     const row = await env.DB.prepare("SELECT setting_value FROM site_settings WHERE setting_key = 'hero_video_url'").first();
     return json({ hero_video_url: row ? row.setting_value : "" });
   }
@@ -175,7 +191,7 @@ async function handleApi(request, env) {
   if (path === "/api/me" && method === "GET") return json({ ok: true });
 
   if (path === "/api/site-settings" && (method === "GET" || method === "PUT")) {
-    await env.DB.prepare("CREATE TABLE IF NOT EXISTS site_settings (setting_key TEXT PRIMARY KEY, setting_value TEXT NOT NULL DEFAULT '', updated_at TEXT DEFAULT CURRENT_TIMESTAMP)").run();
+    await ensureSiteSettingsTable(env.DB);
     if (method === "GET") {
       const row = await env.DB.prepare("SELECT setting_value FROM site_settings WHERE setting_key = 'hero_video_url'").first();
       return json({ hero_video_url: row ? row.setting_value : "" });
