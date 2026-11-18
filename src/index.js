@@ -217,7 +217,6 @@ async function handleApi(request, env) {
     const body = await request.json().catch(() => ({}));
     const videoUrl = String(body.hero_video_url || "").trim();
     if (videoUrl && !/^https:\/\//i.test(videoUrl)) return json({ error: "رابط فيديو الواجهة غير صالح." }, 400);
-    const settingColumns = await ensureSiteSettingsTable(env.DB);
     if (settingColumns.has("id") && settingColumns.has("data")) {
       // Legacy schema is a singleton row constrained to id = 1.
       const existing = await env.DB.prepare("SELECT data FROM site_settings WHERE id = 1").first();
