@@ -143,6 +143,13 @@ async function handleApi(request, env) {
     });
   }
 
+  // Public homepage settings used by the hero section.
+  if (path === "/api/public/site-settings" && method === "GET") {
+    await env.DB.prepare("CREATE TABLE IF NOT EXISTS site_settings (setting_key TEXT PRIMARY KEY, setting_value TEXT NOT NULL DEFAULT '', updated_at TEXT DEFAULT CURRENT_TIMESTAMP)").run();
+    const row = await env.DB.prepare("SELECT setting_value FROM site_settings WHERE setting_key = 'hero_video_url'").first();
+    return json({ hero_video_url: row ? row.setting_value : "" });
+  }
+
   // Public portfolio endpoints: only published projects are exposed.
   if (path === "/api/public/projects" && method === "GET") {
     const result = await env.DB.prepare(
@@ -166,6 +173,19 @@ async function handleApi(request, env) {
 
   if (!(await isAuthenticated(request, env))) return json({ error: "يرجى تسجيل الدخول أولاً." }, 401);
   if (path === "/api/me" && method === "GET") return json({ ok: true });
+
+  if (path === "/api/site-settings" && (method === "GET" || method === "PUT")) {
+    await env.DB.prepare("CREATE TABLE IF NOT EXISTS site_settings (setting_key TEXT PRIMARY KEY, setting_value TEXT NOT NULL DEFAULT '', updated_at TEXT DEFAULT CURRENT_TIMESTAMP)").run();
+    if (method === "GET") {
+      const row = await env.DB.prepare("SELECT setting_value FROM site_settings WHERE setting_key = 'hero_video_url'").first();
+      return json({ hero_video_url: row ? row.setting_value : "" });
+    }
+    const body = await request.json().catch(() => ({}));
+    const videoUrl = String(body.hero_video_url || "").trim();
+    if (videoUrl && !/^https:\/\//i.test(videoUrl)) return json({ error: "رابط فيديو الواجهة غير صالح." }, 400);
+    await env.DB.prepare("INSERT INTO site_settings (setting_key, setting_value, updated_at) VALUES ('hero_video_url', ?, CURRENT_TIMESTAMP) ON CONFLICT(setting_key) DO UPDATE SET setting_value = excluded.setting_value, updated_at = CURRENT_TIMESTAMP").bind(videoUrl).run();
+    return json({ ok: true, hero_video_url: videoUrl });
+  }
 
   if (path === "/api/categories" && method === "GET") {
     const result = await env.DB.prepare("SELECT id, name, slug, sort_order FROM categories ORDER BY sort_order, name").all();
@@ -386,13 +406,14 @@ async function handleApi(request, env) {
     const file = form.get("file");
     if (!file || typeof file.arrayBuffer !== "function") return json({ error: "اختر ملفاً أولاً." }, 400);
     const isProjectAudio=String(form.get("image_type")||"")==="projectAudio";
-    if(isProjectAudio?(file.type!=="audio/mpeg"&&!/\.mp3$/i.test(file.name||"")):!["image/jpeg","image/png","image/webp"].includes(file.type)){
-      return json({error:isProjectAudio?"يرجى رفع ملف MP3 فقط.":"الصيغ المدعومة هي JPG وPNG وWEBP فقط."},415);
+    const isHeroVideo=String(form.get("image_type")||"")==="heroVideo";
+    if(isHeroVideo?!["video/mp4","video/webm"].includes(file.type):isProjectAudio?(file.type!=="audio/mpeg"&&!/\\.mp3$/i.test(file.name||"")):!["image/jpeg","image/png","image/webp"].includes(file.type)){
+      return json({error:isHeroVideo?"يرجى رفع فيديو MP4 أو WEBM فقط.":isProjectAudio?"يرجى رفع ملف MP3 فقط.":"الصيغ المدعومة هي JPG وPNG وWEBP فقط."},415);
     }
     if (file.size > MAX_UPLOAD_BYTES) return json({ error: "حجم الملف يتجاوز 20 ميجابايت. قلّل حجمه ثم أعد المحاولة." }, 413);
     const projectId = String(form.get("project_id") || "general").replace(/[^0-9]/g, "") || "general";
     const requestedType = String(form.get("image_type") || "image");
-    const allowedTypes = ["image", "cover", "gallery", "tour360", "projectAudio"];
+    const allowedTypes = ["image", "cover", "gallery", "tour360", "projectAudio", "heroVideo"];
     if (!allowedTypes.includes(requestedType)) return json({ error: "نوع الصورة غير مسموح." }, 400);
     const imageType = requestedType;
     const bytes = new Uint8Array(await file.arrayBuffer());
