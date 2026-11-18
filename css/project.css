@@ -152,3 +152,20 @@ body.video-viewer-open{overflow:hidden}
  .video-card-label{left:12px;bottom:12px;font-size:8px}
 }
 @media(prefers-reduced-motion:reduce){.video-open-card>img,.video-card-play{transition:none}}
+
+
+/* Interactive before / after comparison */
+.before-after-section{padding-top:clamp(42px,7vw,86px)}
+.before-after-frame{position:relative;width:min(1120px,100%);margin:28px auto 0;overflow:hidden;isolation:isolate;background:#090909;border:1px solid rgba(198,165,107,.35);border-radius:12px;aspect-ratio:16/9;box-shadow:0 25px 80px rgba(0,0,0,.35)}
+.before-after-image{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;user-select:none;pointer-events:none}
+.before-after-after-clip{position:absolute;inset:0;clip-path:inset(0 50% 0 0);overflow:hidden}
+.before-after-after-clip .before-after-image{width:100%;height:100%}
+.before-after-label{position:absolute;top:18px;z-index:3;padding:8px 12px;border:1px solid #ffffff55;border-radius:3px;background:#090909b8;color:#fff;font-size:9px;letter-spacing:2px;backdrop-filter:blur(8px)}
+.before-label{left:18px}.after-label{right:18px}
+.before-after-divider{position:absolute;z-index:4;top:0;bottom:0;left:50%;width:2px;background:#fff;box-shadow:0 0 12px #000;pointer-events:none}
+.before-after-divider>span{position:absolute;top:50%;left:50%;width:48px;height:48px;transform:translate(-50%,-50%);display:grid;place-items:center;border:2px solid #fff;border-radius:50%;background:#111b;color:#fff}
+.before-after-divider>span:before,.before-after-divider>span:after{content:"";position:absolute;width:7px;height:7px;border-top:2px solid #fff;border-right:2px solid #fff}
+.before-after-divider>span:before{transform:rotate(-135deg);left:11px}.before-after-divider>span:after{transform:rotate(45deg);right:11px}
+.before-after-range{position:absolute;z-index:5;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:ew-resize;touch-action:pan-y}
+.before-after-range:focus-visible{opacity:.01;outline:2px solid #c6a56b;outline-offset:-4px}
+@media(max-width:650px){.before-after-frame{aspect-ratio:4/3;border-radius:8px}.before-after-label{top:10px;padding:6px 8px;font-size:8px}.before-label{left:10px}.after-label{right:10px}.before-after-divider>span{width:40px;height:40px}}
