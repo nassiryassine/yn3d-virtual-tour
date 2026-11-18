@@ -153,3 +153,58 @@ body.video-viewer-open{overflow:hidden}
  .video-card-label{left:12px;bottom:12px;font-size:8px}
 }
 @media(prefers-reduced-motion:reduce){.video-open-card>img,.video-card-play{transition:none}}
+
+
+/* ==========================================================
+   YN3D / Architectural editorial refresh — project pages only
+   Scoped to .project-page; homepage and admin styles untouched.
+   ========================================================== */
+.project-page{background:#101110;color:#f1eee7}
+.project-page .site-header{position:relative;padding:22px 6vw;background:rgba(16,17,16,.96);border-bottom:1px solid rgba(211,198,174,.14)}
+.project-page .site-header nav{gap:clamp(18px,3vw,42px);font-size:9px;letter-spacing:1.8px}
+.project-page .site-header nav a{transition:color .25s}
+.project-page .site-header nav a:hover{color:#d5b985}
+.project-page .site-header .nav-contact{padding:12px 17px;border-color:rgba(198,165,107,.5)}
+.project-page #project-content{overflow:hidden}
+.project-page .project-hero{position:relative;padding:clamp(76px,10vw,142px) max(7vw,calc((100vw - 1440px)/2)) 76px;border-bottom:1px solid rgba(211,198,174,.15);background:radial-gradient(ellipse at 82% 12%,rgba(173,145,99,.10),transparent 38%),linear-gradient(115deg,#151715 0%,#101110 65%,#171713 100%)}
+.project-page .project-hero:after{content:"";position:absolute;right:7vw;top:clamp(55px,8vw,115px);width:clamp(90px,13vw,180px);height:1px;background:linear-gradient(90deg,transparent,#b99b6c);opacity:.65}
+.project-page .project-hero .eyebrow{display:flex;align-items:center;gap:13px;font-size:9px;letter-spacing:2.6px;color:#c8aa78}
+.project-page .project-hero .eyebrow:before{content:"";width:30px;height:1px;background:#b99b6c}
+.project-page .project-hero h1{max-width:1050px;font-size:clamp(48px,8.2vw,112px);line-height:.98;letter-spacing:-.055em;font-weight:500;margin:30px 0 25px;text-wrap:balance}
+.project-page .project-description{max-width:670px;color:#aaa99f;font-size:14px;line-height:2}
+.project-page .project-location{display:inline-flex;align-items:center;gap:9px;margin-top:26px;color:#d2b787;font-size:9px;letter-spacing:1.8px;text-transform:uppercase}
+.project-page .project-location:before{content:"";width:5px;height:5px;border-radius:50%;background:#c6a56b;box-shadow:0 0 0 4px #c6a56b20}
+.project-page .project-back{margin-top:34px;padding:13px 0;border-bottom:1px solid rgba(198,165,107,.55);color:#d1b17c;font-size:9px;letter-spacing:1.8px;transition:color .2s,border-color .2s}
+.project-page .project-back:hover{color:#fff;border-color:#fff}
+.project-page .project-section{position:relative;max-width:1600px;margin:0 auto;padding:clamp(64px,8vw,112px) max(7vw,calc((100vw - 1440px)/2));border-bottom:1px solid rgba(211,198,174,.13)}
+.project-page .project-section-heading{margin-bottom:38px;gap:20px}
+.project-page .project-section-heading h2{font-size:clamp(30px,4.5vw,58px);font-weight:500;letter-spacing:-.045em;line-height:1.05}
+.project-page .project-section-heading h2 em{color:#c6a56b}
+.project-page .project-section-heading>span{padding-bottom:7px;color:#77786f;font-size:8px;letter-spacing:2px;white-space:nowrap}
+.project-page .gallery-grid,.project-page .video-grid{gap:14px}
+.project-page .gallery-item{position:relative;background:#191a17;border:1px solid rgba(211,198,174,.12)}
+.project-page .gallery-item:after{content:"";position:absolute;inset:0;pointer-events:none;border:1px solid transparent;transition:border-color .35s}
+.project-page .gallery-item:hover:after{border-color:rgba(198,165,107,.55)}
+.project-page .gallery-item img{height:clamp(250px,32vw,470px);filter:saturate(.88);transition:transform .7s cubic-bezier(.2,.7,.2,1),filter .5s}
+.project-page .gallery-item:hover img{transform:scale(1.025);filter:saturate(1)}
+.project-page .media-empty{padding:55px 25px;border:1px solid rgba(211,198,174,.18);background:#151613;color:#929187}
+.project-page .tour-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:20px}
+.project-page .panoee-tour-card,.project-page .panorama-thumb{border-color:rgba(198,165,107,.28);box-shadow:0 12px 35px #0003}
+.project-page .panoee-tour-card:hover,.project-page .panorama-thumb:hover{border-color:#c6a56b}
+.project-page .project-audio-player{max-width:760px;margin-top:42px;border:1px solid rgba(198,165,107,.28);background:linear-gradient(110deg,#1b1c19,#121310);box-shadow:0 16px 45px #0003}
+.project-page footer{padding:32px 6vw;border-top:1px solid rgba(211,198,174,.14);background:#0d0e0d}
+.project-page footer>span{color:#77786f;font-size:8px;letter-spacing:1.5px}
+.project-page .project-loading{min-height:45vh;display:grid;place-content:center;color:#aaa}
+@media(max-width:760px){
+ .project-page .site-header{padding:17px 6vw}
+ .project-page .project-hero{padding:72px 7vw 48px}
+ .project-page .project-hero:after{display:none}
+ .project-page .project-hero h1{font-size:clamp(44px,12vw,72px);letter-spacing:-.05em}
+ .project-page .project-section{padding:58px 7vw}
+ .project-page .project-section-heading{align-items:flex-start;margin-bottom:25px}
+ .project-page .gallery-item img{height:clamp(250px,72vw,390px)}
+ .project-page footer{gap:18px;flex-wrap:wrap}
+}
+@media(prefers-reduced-motion:reduce){
+ .project-page .gallery-item img,.project-page .site-header nav a,.project-page .project-back{transition:none}
+}
