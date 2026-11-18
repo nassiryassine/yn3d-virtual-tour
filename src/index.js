@@ -424,7 +424,7 @@ async function handleApi(request, env) {
     if (file.size > MAX_UPLOAD_BYTES) return json({ error: "حجم الملف يتجاوز 20 ميجابايت. قلّل حجمه ثم أعد المحاولة." }, 413);
     const projectId = String(form.get("project_id") || "general").replace(/[^0-9]/g, "") || "general";
     const requestedType = String(form.get("image_type") || "image");
-    const allowedTypes = ["image", "cover", "gallery", "tour360", "projectAudio"];
+    const allowedTypes = ["image", "cover", "gallery", "tour360", "projectAudio", "beforeAfterBefore", "beforeAfterAfter"];
     if (!allowedTypes.includes(requestedType)) return json({ error: "نوع الصورة غير مسموح." }, 400);
     const imageType = requestedType;
     const bytes = new Uint8Array(await file.arrayBuffer());
@@ -461,7 +461,7 @@ async function handleApi(request, env) {
       ? githubFile.download_url
       : "https://raw.githubusercontent.com/" + env.GITHUB_REPO + "/" + env.GITHUB_BRANCH + "/" + repoPath;
     if (projectId !== "general") {
-      if(imageType==="projectAudio")await env.DB.prepare("DELETE FROM project_images WHERE project_id = ? AND image_type = 'projectAudio'").bind(Number(projectId)).run();
+      if(["projectAudio","beforeAfterBefore","beforeAfterAfter"].includes(imageType))await env.DB.prepare("DELETE FROM project_images WHERE project_id = ? AND image_type = ?").bind(Number(projectId),imageType).run();
       const inserted = await env.DB.prepare(
         "INSERT INTO project_images (project_id, github_path, image_url, image_type, sort_order) VALUES (?, ?, ?, ?, ?)"
       ).bind(Number(projectId), repoPath, rawUrl, imageType, 0).run();
