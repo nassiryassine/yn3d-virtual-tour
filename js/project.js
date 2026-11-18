@@ -3,7 +3,7 @@
  const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  if(!slug){root.innerHTML='<div class="project-loading">Project link is missing. <a href="index.html">Back to portfolio</a></div>';return;}
  function videoMarkup(url,index){
-  const yt=url.match(/(?:youtube\\.com\\/(?:watch\\?v=|embed\\/)|youtu\\.be\\/)([A-Za-z0-9_-]{6,})/),vm=url.match(/vimeo\\.com\\/(\\d+)/),local=/\\.(mp4|webm|ogg)(\\?.*)?$/i.test(url);
+  const yt=url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{6,})/),vm=url.match(/vimeo\.com\/(\d+)/),local=/\.(mp4|webm|ogg)(\?.*)?$/i.test(url);
   if(yt)return '<button class="video-item video-open-card" type="button" data-video-index="'+index+'" aria-label="Play project video"><img src="https://i.ytimg.com/vi/'+yt[1]+'/hqdefault.jpg" alt="" loading="lazy"><span class="video-card-shade"></span><span class="video-card-play" aria-hidden="true">▶</span><span class="video-card-label">WATCH PROJECT FILM</span></button>';
   if(vm||local)return '<button class="video-item video-open-card video-generic-card" type="button" data-video-index="'+index+'" aria-label="Play project video"><span class="video-generic-mark">YN <em>3D</em></span><span class="video-card-shade"></span><span class="video-card-play" aria-hidden="true">▶</span><span class="video-card-label">WATCH PROJECT FILM</span></button>';
   return '<div class="media-empty">Unsupported video link format.</div>';
@@ -56,8 +56,8 @@
    const item=items[index];if(!item)return;
    lastFocused=document.activeElement;stage.replaceChildren();
    const url=String(item.image_url||'');
-   const yt=url.match(/(?:youtube\\.com\\/(?:watch\\?v=|embed\\/)|youtu\\.be\\/)([A-Za-z0-9_-]{6,})/);
-   const vm=url.match(/vimeo\\.com\\/(\\d+)/);
+   const yt=url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{6,})/);
+   const vm=url.match(/vimeo\.com\/(\d+)/);
    let player;
    if(yt){
     player=document.createElement('iframe');
@@ -67,7 +67,7 @@
     player=document.createElement('iframe');
     player.src='https://player.vimeo.com/video/'+encodeURIComponent(vm[1])+'?autoplay=1&title=0&byline=0&portrait=0';
     player.title='Project video';player.allow='autoplay; fullscreen; picture-in-picture';player.allowFullscreen=true;
-   }else if(/\\.(mp4|webm|ogg)(\\?.*)?$/i.test(url)){
+   }else if(/\.(mp4|webm|ogg)(\?.*)?$/i.test(url)){
     player=document.createElement('video');player.src=url;player.controls=true;player.autoplay=true;player.playsInline=true;player.preload='auto';
    }else return;
    player.className='video-lightbox-player';stage.appendChild(player);
