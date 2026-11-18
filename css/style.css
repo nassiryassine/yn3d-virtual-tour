@@ -161,3 +161,12 @@ footer .brand-mark{color:#f7f1eb}
   *,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
   .reveal-ready [data-reveal]{opacity:1;transform:none}
 }
+
+
+/* Homepage hero background video: retain the architectural image as a fallback. */
+.hero-image{position:relative;overflow:hidden}
+.hero-background-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;z-index:0;opacity:0;transition:opacity .7s ease}
+.hero-background-video.is-ready{opacity:1}
+.hero-image:after{z-index:1}
+.hero-image-label{position:relative;z-index:2}
+@media(prefers-reduced-motion:reduce){.hero-background-video{display:none}}
