@@ -199,7 +199,10 @@ async function handleApi(request, env) {
     const body = await request.json().catch(() => ({}));
     const videoUrl = String(body.hero_video_url || "").trim();
     if (videoUrl && !/^https:\/\//i.test(videoUrl)) return json({ error: "رابط فيديو الواجهة غير صالح." }, 400);
-    await env.DB.prepare("INSERT INTO site_settings (setting_key, setting_value, updated_at) VALUES ('hero_video_url', ?, CURRENT_TIMESTAMP) ON CONFLICT(setting_key) DO UPDATE SET setting_value = excluded.setting_value, updated_at = CURRENT_TIMESTAMP").bind(videoUrl).run();
+    const updatedSetting = await env.DB.prepare("UPDATE site_settings SET setting_value = ?, updated_at = CURRENT_TIMESTAMP WHERE setting_key = 'hero_video_url'").bind(videoUrl).run();
+    if (!updatedSetting.meta || updatedSetting.meta.changes === 0) {
+      await env.DB.prepare("INSERT INTO site_settings (setting_key, setting_value, updated_at) VALUES ('hero_video_url', ?, CURRENT_TIMESTAMP)").bind(videoUrl).run();
+    }
     return json({ ok: true, hero_video_url: videoUrl });
   }
 
