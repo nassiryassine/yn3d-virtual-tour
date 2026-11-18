@@ -52,6 +52,29 @@ const menu=document.querySelector('.menu-toggle');if(menu){menu.addEventListener
 })();
 
 
+// Restrained pointer and scroll parallax for the homepage hero.
+(function(){
+  const hero=document.querySelector('.hero'),visual=document.querySelector('.hero-visual'),image=document.querySelector('.hero-image'),stamp=document.querySelector('.hero-stamp');
+  const reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(!hero||!visual||!image||reduce)return;
+  let frame=0,lastY=0;
+  const paint=()=>{
+    frame=0;
+    const rect=hero.getBoundingClientRect(),progress=Math.max(-1,Math.min(1,-rect.top/Math.max(1,hero.offsetHeight)));
+    image.style.setProperty('--hero-parallax-y',(progress*22)+'px');
+    if(stamp)stamp.style.transform='translate3d(0,'+(progress*-13)+'px,0)';
+  };
+  window.addEventListener('scroll',()=>{lastY=window.scrollY;if(!frame)frame=requestAnimationFrame(paint);},{passive:true});
+  visual.addEventListener('pointermove',event=>{
+    if(event.pointerType==='touch')return;
+    const rect=visual.getBoundingClientRect(),x=(event.clientX-rect.left)/rect.width-.5,y=(event.clientY-rect.top)/rect.height-.5;
+    visual.style.setProperty('--hero-tilt-x',(y*-2.2)+'deg');
+    visual.style.setProperty('--hero-tilt-y',(x*2.2)+'deg');
+  });
+  visual.addEventListener('pointerleave',()=>{visual.style.setProperty('--hero-tilt-x','0deg');visual.style.setProperty('--hero-tilt-y','0deg');});
+  paint();
+})();
+
 // Subtle reveal-on-scroll motion; keeps the portfolio content and links intact.
 (function(){
   const reduceMotion=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
