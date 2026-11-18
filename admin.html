@@ -99,7 +99,8 @@
               <div class="field full"><label for="projectImages">صور المشروع</label><input id="projectImages" type="file" accept="image/jpeg,image/png,image/webp" multiple><div class="hint">JPG أو PNG أو WEBP، بحد أقصى 20 ميجابايت للصورة. يمكنك اختيار صورة الغلاف من الصور الحالية أو الجديدة.</div><div id="savedProjectImages" class="image-grid"><div class="hint">احفظ المشروع أولاً لإضافة الصور.</div></div><div id="newProjectImagePreview" class="image-grid"></div></div>
               <div class="field full"><label for="projectVideos">روابط فيديوهات المشروع</label><textarea id="projectVideos" placeholder="ضع رابط كل فيديو في سطر مستقل (YouTube أو Vimeo أو Google Drive)"></textarea><div class="hint">أضف روابط YouTube أو Vimeo أو Google Drive، رابطاً واحداً في كل سطر. سيعمل الفيديو داخل صفحة مشروعك دون الانتقال إلى موقع المنصة. في Google Drive اجعل المشاركة متاحة لمن لديه الرابط.</div></div>
               <div class="field full"><label>جولات Panoee الخاصة بالمشروع</label><div id="panoeeTourRows"></div><button class="btn" type="button" id="addPanoeeTourButton">+ إضافة جولة</button><div class="hint">أضف جولة أو أكثر، واكتب المسمّى الذي تريد أن يظهر للزائر بجانب رابط كل جولة.</div></div>
-              <div class="field full"><label for="projectAudio">الصوت الخاص بالمشروع (MP3)</label><input id="projectAudio" type="file" accept="audio/mpeg,.mp3"><div id="savedProjectAudio" class="hint">لا يوجد صوت محفوظ لهذا المشروع.</div><label class="hint"><input id="removeProjectAudio" type="checkbox"> إزالة الصوت المحفوظ</label><div class="hint">ملف MP3 بحد أقصى 20 ميجابايت. يبدأ تشغيله عند فتح صفحة المشروع، ويمكن للزائر التحكم في الصوت.</div></div>
+              <div class="field full"><label>مقارنة قبل / بعد (Before & After)</label><div class="form-grid"><div class="field"><label for="projectBeforeImage">صورة قبل</label><input id="projectBeforeImage" type="file" accept="image/jpeg,image/png,image/webp"></div><div class="field"><label for="projectAfterImage">صورة بعد</label><input id="projectAfterImage" type="file" accept="image/jpeg,image/png,image/webp"></div></div><div id="savedBeforeAfter" class="hint">لم تتم إضافة مقارنة لهذا المشروع.</div><div class="hint">ارفع الصورتين بنفس زاوية التصوير قدر الإمكان. ستظهر أداة سحب تفاعلية للزوار عند توفر الصورتين.</div></div>
+               <div class="field full"><label for="projectAudio">الصوت الخاص بالمشروع (MP3)</label><input id="projectAudio" type="file" accept="audio/mpeg,.mp3"><div id="savedProjectAudio" class="hint">لا يوجد صوت محفوظ لهذا المشروع.</div><label class="hint"><input id="removeProjectAudio" type="checkbox"> إزالة الصوت المحفوظ</label><div class="hint">ملف MP3 بحد أقصى 20 ميجابايت. يبدأ تشغيله عند فتح صفحة المشروع، ويمكن للزائر التحكم في الصوت.</div></div>
               <div class="field full"><label for="projectTourImages">صور الجولة الافتراضية 360°</label><input id="projectTourImages" type="file" accept="image/jpeg,image/png,image/webp" multiple><div class="hint">ارفع صور بانورامية حقيقية 360° بنسبة 2:1 (مثال 6000×3000). الصور العادية لن تعمل كجولة. الحد الأقصى 20MB للصورة.</div><div id="savedTourImages" class="panorama-admin-grid"><div class="hint">احفظ المشروع أولاً لإدارة مشاهد 360°.</div></div></div>
             </div>
             <div id="projectMessage" class="message"></div>
@@ -144,6 +145,7 @@ let selectedNewCoverIndex = null;
 let previewUrls = [];
 let savedTourImages = [];
 let savedProjectAudio = null;
+let savedBeforeAfter = {before:null,after:null};
 function panoeeTourMeta(value,index=0){
  try{const parsed=JSON.parse(value||'');if(parsed&&typeof parsed==='object')return {name:String(parsed.name||('جولة '+(index+1))),coverImage:String(parsed.coverImage||'')};}catch{}
  return {name:value&&!String(value).startsWith('external-panoee-tour-')?String(value):'جولة '+(index+1),coverImage:''};
@@ -282,7 +284,7 @@ function renderSavedTourImages() {
 }
 function resetForm() {
   clearImagePreviews(); savedImages=[]; savedTourImages=[]; currentCoverImage=null; selectedSavedCoverId=null; selectedNewCoverIndex=null;
-  $('projectForm').reset(); $('projectId').value=''; $('projectOrder').value='0'; $('editorTitle').textContent='إضافة مشروع جديد'; $('saveProjectButton').textContent='حفظ المشروع'; $('projectVideos').value=''; $('projectTourImages').value=''; $('panoeeTourRows').innerHTML=''; addPanoeeTourRow(); $('projectAudio').value=''; $('removeProjectAudio').checked=false; savedProjectAudio=null; $('savedProjectAudio').textContent='لا يوجد صوت محفوظ لهذا المشروع.'; $('savedTourImages').innerHTML='<div class="hint">لا توجد مشاهد محفوظة بعد.</div>'; $('savedProjectImages').innerHTML='<div class="hint">احفظ المشروع أولاً لإضافة الصور.</div>'; renderCategoryOptions(); clearMessage('projectMessage');
+  $('projectForm').reset(); $('projectId').value=''; $('projectOrder').value='0'; $('editorTitle').textContent='إضافة مشروع جديد'; $('saveProjectButton').textContent='حفظ المشروع'; $('projectVideos').value=''; $('projectTourImages').value=''; $('panoeeTourRows').innerHTML=''; addPanoeeTourRow(); $('projectAudio').value=''; $('projectBeforeImage').value=''; $('projectAfterImage').value=''; $('savedBeforeAfter').textContent='لم تتم إضافة مقارنة لهذا المشروع.'; savedBeforeAfter={before:null,after:null}; $('removeProjectAudio').checked=false; savedProjectAudio=null; $('savedProjectAudio').textContent='لا يوجد صوت محفوظ لهذا المشروع.'; $('savedTourImages').innerHTML='<div class="hint">لا توجد مشاهد محفوظة بعد.</div>'; $('savedProjectImages').innerHTML='<div class="hint">احفظ المشروع أولاً لإضافة الصور.</div>'; renderCategoryOptions(); clearMessage('projectMessage');
 }
 async function editProject(id) {
   const p=projects.find(x=>Number(x.id)===Number(id)); if(!p)return;
@@ -290,7 +292,7 @@ async function editProject(id) {
   $('projectLocation').value=p.location||''; $('projectDescription').value=p.description||'';
   $('projectStatus').value=p.status||'draft'; $('projectOrder').value=p.sort_order||0;
   renderCategoryOptions(p.category_id); $('projectImages').value='';
-  $('projectVideos').value=''; $('projectTourImages').value=''; $('projectAudio').value=''; $('removeProjectAudio').checked=false; $('savedProjectAudio').textContent='جارٍ تحميل الصوت المحفوظ...'; $('panoeeTourRows').innerHTML=''; $('savedTourImages').textContent='جارٍ تحميل المشاهد المحفوظة...';
+  $('projectVideos').value=''; $('projectTourImages').value=''; $('projectAudio').value=''; $('projectBeforeImage').value=''; $('projectAfterImage').value=''; $('savedBeforeAfter').textContent='جارٍ تحميل المقارنة...'; $('removeProjectAudio').checked=false; $('savedProjectAudio').textContent='جارٍ تحميل الصوت المحفوظ...'; $('panoeeTourRows').innerHTML=''; $('savedTourImages').textContent='جارٍ تحميل المشاهد المحفوظة...';
   $('editorTitle').textContent='تعديل المشروع'; $('saveProjectButton').textContent='حفظ التعديلات';
   clearMessage('projectMessage'); $('editorPanel').scrollIntoView({behavior:'smooth',block:'start'});
   try {
@@ -408,6 +410,14 @@ $('projectForm').addEventListener('submit',async e=>{
       await api('/projects/'+saved.id+'/cover',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({image_id:uploadedImages[selectedNewCoverIndex].id})});
     }else if(selectedSavedCoverId!==null){
       await api('/projects/'+saved.id+'/cover',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({image_id:selectedSavedCoverId})});
+    }
+    const beforeFile=$('projectBeforeImage').files[0],afterFile=$('projectAfterImage').files[0];
+    if((beforeFile&&!savedBeforeAfter.after&&!afterFile)||(afterFile&&!savedBeforeAfter.before&&!beforeFile))throw new Error('لإضافة مقارنة جديدة، ارفع صورة قبل وصورة بعد معاً.');
+    for(const item of [{file:beforeFile,type:'beforeAfterBefore'},{file:afterFile,type:'beforeAfterAfter'}]){
+      if(!item.file)continue;
+      if(item.file.size>20*1024*1024)throw new Error('صورة المقارنة تتجاوز 20 ميجابايت.');
+      const form=new FormData();form.append('file',item.file);form.append('project_id',String(saved.id));form.append('image_type',item.type);
+      await api('/upload',{method:'POST',body:form});
     }
     for(const file of tourFiles){
       if(file.size>20*1024*1024) throw new Error('صورة الجولة '+file.name+' تتجاوز 20 ميجابايت.');
