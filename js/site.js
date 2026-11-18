@@ -41,3 +41,22 @@ const menu=document.querySelector('.menu-toggle');if(menu){menu.addEventListener
   },{threshold:.12,rootMargin:'0px 0px -35px 0px'});
   targets.forEach(el=>observer.observe(el));
 })();
+
+
+// Load the administrator-selected homepage hero video; the image remains as fallback.
+(async function loadHomepageHeroVideo(){
+  const video=document.getElementById('hero-background-video');
+  if(!video)return;
+  try{
+    const response=await fetch('/api/public/site-settings',{headers:{'Accept':'application/json'}});
+    if(!response.ok)return;
+    const settings=await response.json();
+    const source=String(settings.hero_video_url||'').trim();
+    if(!source)return;
+    video.src=source;
+    video.addEventListener('canplay',()=>video.classList.add('is-ready'),{once:true});
+    video.addEventListener('error',()=>{video.classList.remove('is-ready');video.removeAttribute('src');},{once:true});
+    const playback=video.play();
+    if(playback&&typeof playback.catch==='function')playback.catch(()=>{});
+  }catch(error){console.warn('Homepage hero video could not be loaded.',error);}
+})();
