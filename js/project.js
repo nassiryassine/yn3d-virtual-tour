@@ -2,11 +2,10 @@
  const root=document.getElementById('project-content'),slug=new URLSearchParams(location.search).get('slug');
  const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  if(!slug){root.innerHTML='<div class="project-loading">Project link is missing. <a href="index.html">Back to portfolio</a></div>';return;}
- function videoMarkup(url){
-  const safe=esc(url),yt=url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{6,})/),vm=url.match(/vimeo\.com\/(\d+)/);
-  if(yt)return '<div class="video-item"><iframe src="https://www.youtube-nocookie.com/embed/'+yt[1]+'" title="Project video" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>';
-  if(vm)return '<div class="video-item"><iframe src="https://player.vimeo.com/video/'+vm[1]+'" title="Project video" loading="lazy" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div>';
-  if(/\.(mp4|webm|ogg)(\?.*)?$/i.test(url))return '<div class="video-item"><video controls preload="metadata" src="'+safe+'"></video></div>';
+ function videoMarkup(url,index){
+  const yt=url.match(/(?:youtube\\.com\\/(?:watch\\?v=|embed\\/)|youtu\\.be\\/)([A-Za-z0-9_-]{6,})/),vm=url.match(/vimeo\\.com\\/(\\d+)/),local=/\\.(mp4|webm|ogg)(\\?.*)?$/i.test(url);
+  if(yt)return '<button class="video-item video-open-card" type="button" data-video-index="'+index+'" aria-label="Play project video"><img src="https://i.ytimg.com/vi/'+yt[1]+'/hqdefault.jpg" alt="" loading="lazy"><span class="video-card-shade"></span><span class="video-card-play" aria-hidden="true">▶</span><span class="video-card-label">WATCH PROJECT FILM</span></button>';
+  if(vm||local)return '<button class="video-item video-open-card video-generic-card" type="button" data-video-index="'+index+'" aria-label="Play project video"><span class="video-generic-mark">YN <em>3D</em></span><span class="video-card-shade"></span><span class="video-card-play" aria-hidden="true">▶</span><span class="video-card-label">WATCH PROJECT FILM</span></button>';
   return '<div class="media-empty">Unsupported video link format.</div>';
  }
  try{
@@ -17,7 +16,7 @@
   const videos=media.filter(m=>String(m.image_type||'').toLowerCase()==='video');
   const panoramas=media.filter(m=>String(m.image_type||'').toLowerCase()==='tour360').sort((a,b)=>(a.sort_order||0)-(b.sort_order||0)||a.id-b.id);
   const gallery=photos.length?photos.map((m,i)=>'<figure class="gallery-item"><img src="'+esc(m.image_url)+'" alt="'+esc(p.title)+' — image '+(i+1)+'" data-gallery-index="'+i+'" role="button" tabindex="0" aria-label="View full image '+(i+1)+' of '+photos.length+'" loading="lazy"></figure>').join(''):'<div class="media-empty">Project photos will appear here once they are added from the administration panel.</div>';
-  const videoSection=videos.length?videos.map(v=>videoMarkup(v.image_url)).join(''):'<div class="media-empty">Project videos will appear here when video links are added.</div>';
+  const videoSection=videos.length?videos.map((v,i)=>videoMarkup(v.image_url,i)).join(''):'<div class="media-empty">Project videos will appear here when video links are added.</div>';
   const panoeeTours=media.filter(m=>m.image_type==='externalTour').sort((a,b)=>(a.sort_order||0)-(b.sort_order||0)||a.id-b.id);
   const validPanoeeTours=panoeeTours.filter(t=>{try{const u=new URL(t.image_url);return u.protocol==='https:'&&u.hostname==='tour.panoee.net'&&u.pathname.split('/').filter(Boolean).length>0;}catch{return false;}});
   const panoeeEmbedFor=t=>{try{const u=new URL(t.image_url),id=u.pathname.split('/').filter(Boolean).pop();if(!id)return '';return u.pathname.startsWith('/iframe/')?u.href:'https://tour.panoee.net/iframe/'+encodeURIComponent(id)+'?embedFullscreen=1&embedVr=1&embedGyro=1';}catch{return '';}};
@@ -31,8 +30,9 @@
      : '<div class="media-empty">An interactive 360° tour will appear here when panorama scenes are uploaded from the administration panel.</div>';
   const projectAudio=media.find(m=>m.image_type==='projectAudio');
   const audioMarkup=projectAudio?'<div class="project-audio-player"><div class="audio-player-info"><span class="audio-player-kicker">YN 3D · SOUNDTRACK</span><strong>Project music</strong><span class="audio-player-status" id="audio-player-status">READY TO PLAY</span></div><button class="audio-play-button" id="audio-play-button" type="button" aria-label="Play music"><span id="audio-play-icon">▶</span></button><div class="audio-player-track"><div class="audio-track-times"><span id="audio-current-time">00:00</span><span id="audio-duration">00:00</span></div><input class="audio-progress" id="audio-progress" type="range" min="0" max="100" value="0" step="0.1" aria-label="Music progress"></div><audio id="project-soundtrack" src="'+esc(projectAudio.image_url)+'" preload="metadata"></audio></div>':'';
-  root.innerHTML='<section class="project-hero"><p class="eyebrow">'+esc(p.category_name||'YN 3D PROJECT')+'</p><h1>'+esc(p.title)+'</h1><p class="project-description">'+esc(p.description||'Architectural visualization by YN 3D.')+'</p>'+(p.location?'<div class="project-location">'+esc(p.location)+'</div>':'')+'<a class="project-back" href="index.html#work">← BACK TO ALL PROJECTS</a>'+audioMarkup+'</section><section class="project-section"><div class="project-section-heading"><h2>PROJECT <em>GALLERY</em></h2><span>01 / IMAGES</span></div><div class="gallery-grid">'+gallery+'</div><div class="photo-lightbox" id="photo-lightbox" aria-hidden="true"><div class="photo-lightbox-panel" role="dialog" aria-modal="true" aria-label="Project image viewer"><div class="photo-lightbox-header"><span id="photo-lightbox-count"></span><button id="photo-lightbox-close" class="photo-lightbox-close" type="button" aria-label="Close image viewer">×</button></div><div class="photo-lightbox-stage"><button id="photo-lightbox-prev" class="photo-lightbox-nav" type="button" aria-label="Previous image">‹</button><img id="photo-lightbox-image" alt=""><button id="photo-lightbox-next" class="photo-lightbox-nav" type="button" aria-label="Next image">›</button></div></div></div></section><section class="project-section"><div class="project-section-heading"><h2>PROJECT <em>VIDEOS</em></h2><span>02 / MOTION</span></div><div class="video-grid">'+videoSection+'</div></section><section class="project-section"><div class="project-section-heading"><h2>VIRTUAL <em>EXPERIENCE</em></h2><span>03 / 360° TOURS</span></div><div class="tour-grid">'+tourSection+'</div></section>';
+  root.innerHTML='<section class="project-hero"><p class="eyebrow">'+esc(p.category_name||'YN 3D PROJECT')+'</p><h1>'+esc(p.title)+'</h1><p class="project-description">'+esc(p.description||'Architectural visualization by YN 3D.')+'</p>'+(p.location?'<div class="project-location">'+esc(p.location)+'</div>':'')+'<a class="project-back" href="index.html#work">← BACK TO ALL PROJECTS</a>'+audioMarkup+'</section><section class="project-section"><div class="project-section-heading"><h2>PROJECT <em>GALLERY</em></h2><span>01 / IMAGES</span></div><div class="gallery-grid">'+gallery+'</div><div class="photo-lightbox" id="photo-lightbox" aria-hidden="true"><div class="photo-lightbox-panel" role="dialog" aria-modal="true" aria-label="Project image viewer"><div class="photo-lightbox-header"><span id="photo-lightbox-count"></span><button id="photo-lightbox-close" class="photo-lightbox-close" type="button" aria-label="Close image viewer">×</button></div><div class="photo-lightbox-stage"><button id="photo-lightbox-prev" class="photo-lightbox-nav" type="button" aria-label="Previous image">‹</button><img id="photo-lightbox-image" alt=""><button id="photo-lightbox-next" class="photo-lightbox-nav" type="button" aria-label="Next image">›</button></div></div></div></section><section class="project-section"><div class="project-section-heading"><h2>PROJECT <em>VIDEOS</em></h2><span>02 / MOTION</span></div><div class="video-grid">'+videoSection+'</div></section><div class="video-lightbox" id="video-lightbox" aria-hidden="true"><div class="video-lightbox-panel" role="dialog" aria-modal="true" aria-label="Project video player"><div class="video-lightbox-header"><span>YN 3D · PROJECT FILM</span><button class="video-lightbox-close" id="video-lightbox-close" type="button" aria-label="Close video">×</button></div><div class="video-lightbox-stage" id="video-lightbox-stage"></div></div></div><section class="project-section"><div class="project-section-heading"><h2>VIRTUAL <em>EXPERIENCE</em></h2><span>03 / 360° TOURS</span></div><div class="tour-grid">'+tourSection+'</div></section>';
   document.title=p.title+' | YN 3D';
+  if(videos.length)setupVideoViewer(videos);
   if(photos.length) setupPhotoGallery(photos,p.title);
   if(validPanoeeTours.length)setupPanoeeViewer(validPanoeeTours);
   if(!validPanoeeTours.length&&!panoeeTours.length&&panoramas.length)setupVirtualTour(panoramas);
@@ -48,6 +48,42 @@
    window.addEventListener('pagehide',()=>{soundtrack.pause();soundtrack.currentTime=0;});
   }
  }catch(error){root.innerHTML='<div class="project-loading">'+esc(error.message)+'<p><a href="index.html">Back to portfolio</a></p></div>';}
+ function setupVideoViewer(items){
+  const modal=document.getElementById('video-lightbox'),stage=document.getElementById('video-lightbox-stage'),closeButton=document.getElementById('video-lightbox-close');
+  if(!modal||!stage||!closeButton)return;
+  let lastFocused=null;
+  const open=index=>{
+   const item=items[index];if(!item)return;
+   lastFocused=document.activeElement;stage.replaceChildren();
+   const url=String(item.image_url||'');
+   const yt=url.match(/(?:youtube\\.com\\/(?:watch\\?v=|embed\\/)|youtu\\.be\\/)([A-Za-z0-9_-]{6,})/);
+   const vm=url.match(/vimeo\\.com\\/(\\d+)/);
+   let player;
+   if(yt){
+    player=document.createElement('iframe');
+    player.src='https://www.youtube-nocookie.com/embed/'+encodeURIComponent(yt[1])+'?autoplay=1&controls=1&modestbranding=1&rel=0&playsinline=1&iv_load_policy=3';
+    player.title='Project video';player.allow='autoplay; encrypted-media; picture-in-picture; fullscreen';player.referrerPolicy='strict-origin-when-cross-origin';player.allowFullscreen=true;
+   }else if(vm){
+    player=document.createElement('iframe');
+    player.src='https://player.vimeo.com/video/'+encodeURIComponent(vm[1])+'?autoplay=1&title=0&byline=0&portrait=0';
+    player.title='Project video';player.allow='autoplay; fullscreen; picture-in-picture';player.allowFullscreen=true;
+   }else if(/\\.(mp4|webm|ogg)(\\?.*)?$/i.test(url)){
+    player=document.createElement('video');player.src=url;player.controls=true;player.autoplay=true;player.playsInline=true;player.preload='auto';
+   }else return;
+   player.className='video-lightbox-player';stage.appendChild(player);
+   modal.classList.add('open');modal.setAttribute('aria-hidden','false');document.body.classList.add('video-viewer-open');closeButton.focus();
+  };
+  const close=()=>{
+   modal.classList.remove('open');modal.setAttribute('aria-hidden','true');document.body.classList.remove('video-viewer-open');
+   stage.replaceChildren();if(lastFocused&&lastFocused.focus)lastFocused.focus();
+  };
+  document.querySelector('.video-grid').addEventListener('click',event=>{
+   const button=event.target.closest('[data-video-index]');if(button)open(Number(button.dataset.videoIndex));
+  });
+  closeButton.addEventListener('click',close);
+  modal.addEventListener('click',event=>{if(event.target===modal)close();});
+  document.addEventListener('keydown',event=>{if(event.key==='Escape'&&modal.classList.contains('open'))close();});
+ }
  function setupPhotoGallery(items,title){
   const lightbox=document.getElementById('photo-lightbox');
   const image=document.getElementById('photo-lightbox-image');
