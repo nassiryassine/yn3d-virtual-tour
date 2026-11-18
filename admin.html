@@ -77,6 +77,14 @@
           <div id="categoryMessage" class="message"></div>
           <div id="categoryList" class="hint" style="margin-top:17px">جارٍ تحميل التصنيفات...</div>
         </div>
+        <div class="panel" id="heroVideoPanel">
+          <h2>فيديو الصفحة الرئيسية</h2>
+          <div class="field"><label for="heroVideoFile">رفع فيديو جديد (MP4 أو WEBM)</label><input id="heroVideoFile" type="file" accept="video/mp4,video/webm"><div class="hint">الحد الأقصى 20 ميجابايت. سيظهر الفيديو في خلفية الواجهة الرئيسية تلقائياً.</div></div>
+          <div class="field"><label for="heroVideoUrl">أو رابط فيديو مباشر</label><input id="heroVideoUrl" type="url" placeholder="https://example.com/hero-video.mp4"><div class="hint">يمكنك وضع رابط مباشر لملف MP4 أو WEBM بدلاً من رفع ملف.</div></div>
+          <video id="heroVideoPreview" controls muted playsinline style="display:none;width:100%;max-height:190px;background:#080808;border-radius:8px;margin:10px 0"></video>
+          <div id="heroVideoMessage" class="message"></div>
+          <div class="form-actions"><button class="btn primary" id="saveHeroVideoButton" type="button">حفظ فيديو الواجهة</button><button class="btn danger" id="removeHeroVideoButton" type="button">إزالة الفيديو</button></div>
+        </div>
         <div class="panel">
           <h2>ملاحظات</h2>
           <p class="hint">• يتم حفظ بيانات المشاريع والتصنيفات في قاعدة بيانات D1.</p>
@@ -148,6 +156,7 @@ async function checkSession() {
   catch { showLogin(); }
 }
 async function refreshAll() {
+  await loadHeroVideoSettings();
   const [p,c]=await Promise.all([api('/projects'),api('/categories')]);
   projects=p.projects||[]; categories=c.categories||[];
   renderProjects(); renderCategories(); renderCategoryOptions();
@@ -155,6 +164,48 @@ async function refreshAll() {
   $('publishedProjects').textContent=projects.filter(x=>x.status==='published').length;
   $('totalCategories').textContent=categories.length;
 }
+let currentHeroVideoUrl='';
+async function loadHeroVideoSettings(){
+  try{
+    const data=await api('/site-settings');currentHeroVideoUrl=data.hero_video_url||'';
+    $('heroVideoUrl').value=currentHeroVideoUrl;
+    const preview=$('heroVideoPreview');
+    if(currentHeroVideoUrl){preview.src=currentHeroVideoUrl;preview.style.display='block';}else{preview.removeAttribute('src');preview.style.display='none';}
+  }catch(err){showMessage('heroVideoMessage','تعذر تحميل إعدادات فيديو الواجهة: '+err.message);}
+}
+$('heroVideoFile').addEventListener('change',()=>{
+  const file=$('heroVideoFile').files[0],preview=$('heroVideoPreview');
+  if(!file)return;
+  if(file.size>20*1024*1024){showMessage('heroVideoMessage','حجم الفيديو يتجاوز 20 ميجابايت.');$('heroVideoFile').value='';return;}
+  const localUrl=URL.createObjectURL(file);preview.src=localUrl;preview.style.display='block';preview.load();clearMessage('heroVideoMessage');
+});
+$('saveHeroVideoButton').addEventListener('click',async()=>{
+  if(busy)return;clearMessage('heroVideoMessage');setBusy(true,'saveHeroVideoButton');
+  try{
+    let videoUrl=$('heroVideoUrl').value.trim();
+    const file=$('heroVideoFile').files[0];
+    if(file){
+      if(!['video/mp4','video/webm'].includes(file.type))throw new Error('يرجى اختيار فيديو MP4 أو WEBM.');
+      if(file.size>20*1024*1024)throw new Error('حجم الفيديو يتجاوز 20 ميجابايت.');
+      const form=new FormData();form.append('file',file);form.append('project_id','general');form.append('image_type','heroVideo');
+      const uploaded=await api('/upload',{method:'POST',body:form});videoUrl=uploaded.url;
+    }
+    if(!videoUrl)throw new Error('ارفع فيديو أو أدخل رابط فيديو مباشر أولاً.');
+    await api('/site-settings',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({hero_video_url:videoUrl})});
+    currentHeroVideoUrl=videoUrl;$('heroVideoUrl').value=videoUrl;$('heroVideoFile').value='';
+    const preview=$('heroVideoPreview');preview.src=videoUrl;preview.style.display='block';preview.load();
+    showMessage('heroVideoMessage','تم حفظ فيديو الصفحة الرئيسية بنجاح.','success');
+  }catch(err){showMessage('heroVideoMessage',err.message);}
+  finally{setBusy(false,'saveHeroVideoButton');}
+});
+$('removeHeroVideoButton').addEventListener('click',async()=>{
+  if(busy)return;if(!confirm('هل تريد إزالة فيديو الصفحة الرئيسية؟'))return;
+  setBusy(true,'removeHeroVideoButton');
+  try{await api('/site-settings',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({hero_video_url:''})});currentHeroVideoUrl='';$('heroVideoUrl').value='';$('heroVideoFile').value='';$('heroVideoPreview').removeAttribute('src');$('heroVideoPreview').style.display='none';showMessage('heroVideoMessage','تمت إزالة فيديو الصفحة الرئيسية.','success');}
+  catch(err){showMessage('heroVideoMessage',err.message);}
+  finally{setBusy(false,'removeHeroVideoButton');}
+});
+
 function renderCategoryOptions(selected='') {
   $('projectCategory').innerHTML='<option value="">بدون تصنيف</option>'+categories.map(c=>'<option value="'+c.id+'">'+escapeHtml(c.name)+'</option>').join('');
   $('projectCategory').value=String(selected||'');
