@@ -296,3 +296,8 @@ footer .brand-logo{width:116px;height:82px}
 @media(prefers-reduced-motion:reduce){
   .hero-image:before,.hero-image:after{animation:none!important}
 }
+
+/* Keep the parallax offset on the image layer while retaining its slow zoom. */
+.hero-image:before{transform:translate3d(0,var(--hero-parallax-y,0px),0) scale(1.015)}
+.hero-visual{will-change:transform}
+@media(prefers-reduced-motion:reduce){.hero-visual{will-change:auto}.hero-image:before{transform:none!important}}
