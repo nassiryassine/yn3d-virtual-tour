@@ -60,3 +60,38 @@ const menu=document.querySelector('.menu-toggle');if(menu){menu.addEventListener
     if(playback&&typeof playback.catch==='function')playback.catch(()=>{});
   }catch(error){console.warn('Homepage hero video could not be loaded.',error);}
 })();
+
+
+// Apply editable homepage copy, logo and WhatsApp contact from public settings.
+(async function applyPublicSiteSettings(){
+  const escText=(id,value)=>{const el=document.getElementById(id);if(el&&value)el.textContent=value;};
+  const setMultiline=(id,value)=>{const el=document.getElementById(id);if(!el||!value)return;el.replaceChildren();String(value).split(/\\r?\\n/).forEach((line,index)=>{if(index)el.appendChild(document.createElement('br'));el.appendChild(document.createTextNode(line));});};
+  try{
+    const response=await fetch('/api/public/site-settings',{headers:{'Accept':'application/json'}});
+    if(!response.ok)return;
+    const s=await response.json();
+    escText('hero-eyebrow-text',s.hero_eyebrow);
+    setMultiline('hero-heading-text',s.hero_heading);
+    escText('hero-highlight-text',s.hero_highlight);
+    escText('hero-description-text',s.hero_description);
+    escText('hero-primary-text',s.hero_primary_button);
+    escText('hero-secondary-text',s.hero_secondary_button);
+    escText('about-eyebrow-text',s.about_eyebrow);
+    setMultiline('about-heading-text',s.about_heading);
+    escText('about-description-text',s.about_description);
+    escText('tour-eyebrow-text',s.tour_eyebrow);
+    setMultiline('tour-heading-text',s.tour_heading);
+    escText('tour-description-text',s.tour_description);
+    escText('tour-button-text',s.tour_button);
+    if(s.logo_url){
+      ['header-brand-mark','footer-brand-mark'].forEach(id=>{
+        const mark=document.getElementById(id);if(!mark)return;
+        const img=document.createElement('img');img.src=s.logo_url;img.alt='YN 3D';img.style.maxWidth='150px';img.style.maxHeight='52px';img.style.width='auto';img.style.height='auto';img.style.objectFit='contain';mark.replaceChildren(img);
+      });
+    }
+    const phone=String(s.whatsapp_number||'').replace(/\\D/g,'');
+    const contact=document.querySelector('.site-header .nav-contact');
+    if(contact&&phone){contact.href='https://wa.me/'+phone;contact.target='_blank';contact.rel='noopener';contact.innerHTML='WHATSAPP <span>↗</span>';}
+    else if(contact){contact.href='mailto:hello@example.com';}
+  }catch(error){console.warn('Public site settings could not be applied.',error);}
+})();
