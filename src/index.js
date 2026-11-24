@@ -138,6 +138,58 @@ async function getHeroVideoSetting(db, columns) {
   return row ? String(row.setting_value || "") : "";
 }
 
+async function getAllSiteSettings(db, columns) {
+  const defaults = {
+    hero_video_url: "", logo_url: "", whatsapp_number: "",
+    hero_eyebrow: "INDEPENDENT 3D DESIGNER · RIYADH",
+    hero_heading: "DESIGN\\nYOUR", hero_highlight: "VISION.",
+    hero_description: "Architectural visualization that turns ideas into immersive experiences.",
+    hero_primary_button: "EXPLORE PROJECTS", hero_secondary_button: "DISCOVER MORE",
+    about_eyebrow: "01 — THE APPROACH",
+    about_heading: "Spaces are not just seen.\\nThey are experienced.",
+    about_description: "Architectural imagery, detailed environments and interactive 360° tours — created to help clients understand and feel every space before it is built.",
+    tour_eyebrow: "GO BEYOND THE IMAGE",
+    tour_heading: "STEP INSIDE\\nTHE DESIGN.",
+    tour_description: "Explore architectural spaces through immersive 360° virtual tours.",
+    tour_button: "LAUNCH VIRTUAL TOUR"
+  };
+  if (columns.has("id") && columns.has("data")) {
+    const row = await db.prepare("SELECT setting_value, data FROM site_settings WHERE id = 1").first();
+    if (!row) return defaults;
+    let stored = {};
+    try { const parsed = JSON.parse(row.data || "{}"); if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) stored = parsed; } catch {}
+    return { ...defaults, ...stored, hero_video_url: String(row.setting_value || stored.hero_video_url || "") };
+  }
+  const rows = await db.prepare("SELECT setting_key, setting_value FROM site_settings").all();
+  const result = { ...defaults };
+  for (const row of (rows.results || [])) if (Object.prototype.hasOwnProperty.call(defaults, row.setting_key)) result[row.setting_key] = String(row.setting_value || "");
+  return result;
+}
+async function saveSiteSettings(db, columns, patch) {
+  const allowed = ["hero_video_url","logo_url","whatsapp_number","hero_eyebrow","hero_heading","hero_highlight","hero_description","hero_primary_button","hero_secondary_button","about_eyebrow","about_heading","about_description","tour_eyebrow","tour_heading","tour_description","tour_button"];
+  const clean = {};
+  for (const key of allowed) if (Object.prototype.hasOwnProperty.call(patch, key)) clean[key] = String(patch[key] ?? "").trim();
+  if (columns.has("id") && columns.has("data")) {
+    const existing = await db.prepare("SELECT setting_value, data FROM site_settings WHERE id = 1").first();
+    let stored = {};
+    try { const parsed = JSON.parse(existing?.data || "{}"); if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) stored = parsed; } catch {}
+    Object.assign(stored, clean);
+    const video = Object.prototype.hasOwnProperty.call(clean, "hero_video_url") ? clean.hero_video_url : String(existing?.setting_value || stored.hero_video_url || "");
+    stored.hero_video_url = video;
+    const serialized = JSON.stringify(stored);
+    if (existing) {
+      await db.prepare("UPDATE site_settings SET data = ?, setting_key = 'hero_video_url', setting_value = ?, updated_at = CURRENT_TIMESTAMP WHERE id = 1").bind(serialized, video).run();
+    } else {
+      await db.prepare("INSERT INTO site_settings (id, data, setting_key, setting_value, updated_at) VALUES (1, ?, 'hero_video_url', ?, CURRENT_TIMESTAMP)").bind(serialized, video).run();
+    }
+    return;
+  }
+  for (const [key, value] of Object.entries(clean)) {
+    const result = await db.prepare("UPDATE site_settings SET setting_value = ?, updated_at = CURRENT_TIMESTAMP WHERE setting_key = ?").bind(value, key).run();
+    if (!result.meta || result.meta.changes === 0) await db.prepare("INSERT INTO site_settings (setting_key, setting_value, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP)").bind(key, value).run();
+  }
+}
+
 async function handleApi(request, env) {
   const url = new URL(request.url);
   const path = url.pathname;
@@ -177,11 +229,10 @@ async function handleApi(request, env) {
     });
   }
 
-  // Public homepage settings used by the hero section.
+  // Public homepage settings. Only non-sensitive display content is returned.
   if (path === "/api/public/site-settings" && method === "GET") {
     const settingColumns = await ensureSiteSettingsTable(env.DB);
-    const heroVideoUrl = await getHeroVideoSetting(env.DB, settingColumns);
-    return json({ hero_video_url: heroVideoUrl });
+    return json(await getAllSiteSettings(env.DB, settingColumns));
   }
 
   // Public portfolio endpoints: only published projects are exposed.
@@ -210,41 +261,15 @@ async function handleApi(request, env) {
 
   if (path === "/api/site-settings" && (method === "GET" || method === "PUT")) {
     const settingColumns = await ensureSiteSettingsTable(env.DB);
-    if (method === "GET") {
-      const heroVideoUrl = await getHeroVideoSetting(env.DB, settingColumns);
-      return json({ hero_video_url: heroVideoUrl });
-    }
+    if (method === "GET") return json(await getAllSiteSettings(env.DB, settingColumns));
     const body = await request.json().catch(() => ({}));
-    const videoUrl = String(body.hero_video_url || "").trim();
-    if (videoUrl && !/^https:\/\//i.test(videoUrl)) return json({ error: "رابط فيديو الواجهة غير صالح." }, 400);
-    if (settingColumns.has("id") && settingColumns.has("data")) {
-      // Legacy schema is a singleton row constrained to id = 1.
-      const existing = await env.DB.prepare("SELECT data FROM site_settings WHERE id = 1").first();
-      let legacyData = {};
-      if (existing && existing.data) {
-        try {
-          const parsed = JSON.parse(existing.data);
-          if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) legacyData = parsed;
-        } catch {
-          legacyData = {};
-        }
-      }
-      legacyData.hero_video_url = videoUrl;
-      const serialized = JSON.stringify(legacyData);
-      if (existing) {
-        await env.DB.prepare("UPDATE site_settings SET data = ?, setting_key = 'hero_video_url', setting_value = ?, updated_at = CURRENT_TIMESTAMP WHERE id = 1")
-          .bind(serialized, videoUrl).run();
-      } else {
-        await env.DB.prepare("INSERT INTO site_settings (id, data, setting_key, setting_value, updated_at) VALUES (1, ?, 'hero_video_url', ?, CURRENT_TIMESTAMP)")
-          .bind(serialized, videoUrl).run();
-      }
-    } else {
-      const updatedSetting = await env.DB.prepare("UPDATE site_settings SET setting_value = ?, updated_at = CURRENT_TIMESTAMP WHERE setting_key = 'hero_video_url'").bind(videoUrl).run();
-      if (!updatedSetting.meta || updatedSetting.meta.changes === 0) {
-        await env.DB.prepare("INSERT INTO site_settings (setting_key, setting_value, updated_at) VALUES ('hero_video_url', ?, CURRENT_TIMESTAMP)").bind(videoUrl).run();
-      }
-    }
-    return json({ ok: true, hero_video_url: videoUrl });
+    if (body.hero_video_url && !/^https:\/\//i.test(String(body.hero_video_url))) return json({ error: "رابط فيديو الواجهة غير صالح." }, 400);
+    if (body.logo_url && !/^https:\/\//i.test(String(body.logo_url))) return json({ error: "رابط الشعار غير صالح." }, 400);
+    const phone = String(body.whatsapp_number || "").replace(/[\\s()+.-]/g, "");
+    if (Object.prototype.hasOwnProperty.call(body, "whatsapp_number") && phone && !/^\\d{8,15}$/.test(phone)) return json({ error: "أدخل رقم واتساب مع رمز الدولة، من 8 إلى 15 رقماً." }, 400);
+    if (Object.prototype.hasOwnProperty.call(body, "whatsapp_number")) body.whatsapp_number = phone;
+    await saveSiteSettings(env.DB, settingColumns, body);
+    return json({ ok: true });
   }
 
   if (path === "/api/categories" && method === "GET") {
@@ -467,13 +492,14 @@ async function handleApi(request, env) {
     if (!file || typeof file.arrayBuffer !== "function") return json({ error: "اختر ملفاً أولاً." }, 400);
     const isProjectAudio=String(form.get("image_type")||"")==="projectAudio";
     const isHeroVideo=String(form.get("image_type")||"")==="heroVideo";
+    const isLogo=String(form.get("image_type")||"")==="logo";
     if(isHeroVideo?!["video/mp4","video/webm"].includes(file.type):isProjectAudio?(file.type!=="audio/mpeg"&&!/\\.mp3$/i.test(file.name||"")):!["image/jpeg","image/png","image/webp"].includes(file.type)){
       return json({error:isHeroVideo?"يرجى رفع فيديو MP4 أو WEBM فقط.":isProjectAudio?"يرجى رفع ملف MP3 فقط.":"الصيغ المدعومة هي JPG وPNG وWEBP فقط."},415);
     }
     if (file.size > MAX_UPLOAD_BYTES) return json({ error: "حجم الملف يتجاوز 20 ميجابايت. قلّل حجمه ثم أعد المحاولة." }, 413);
     const projectId = String(form.get("project_id") || "general").replace(/[^0-9]/g, "") || "general";
     const requestedType = String(form.get("image_type") || "image");
-    const allowedTypes = ["image", "cover", "gallery", "tour360", "projectAudio", "heroVideo"];
+    const allowedTypes = ["image", "cover", "gallery", "tour360", "projectAudio", "heroVideo", "logo"];
     if (!allowedTypes.includes(requestedType)) return json({ error: "نوع الصورة غير مسموح." }, 400);
     const imageType = requestedType;
     const bytes = new Uint8Array(await file.arrayBuffer());
