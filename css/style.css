@@ -245,3 +245,15 @@ footer .brand-mark{color:#29251f}
 @media(prefers-reduced-motion:reduce){
   body:before{animation:none;transform:scale(1.09)}
 }
+
+
+/* Keep the hero eyebrow text on one line; the generic eyebrow span rule is only for its decorative line. */
+.hero .eyebrow > #hero-eyebrow-text{
+  display:inline;
+  width:auto;
+  height:auto;
+  background:none;
+  vertical-align:baseline;
+  margin:0;
+  white-space:nowrap;
+}
