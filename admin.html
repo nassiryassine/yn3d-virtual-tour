@@ -85,6 +85,28 @@
           <div id="heroVideoMessage" class="message"></div>
           <div class="form-actions"><button class="btn primary" id="saveHeroVideoButton" type="button">حفظ فيديو الواجهة</button><button class="btn danger" id="removeHeroVideoButton" type="button">إزالة الفيديو</button></div>
         </div>
+        <div class="panel" id="siteContentPanel">
+          <h2>هوية الموقع ومحتوى الصفحة الرئيسية</h2>
+          <div class="field"><label for="whatsappNumber">رقم WhatsApp مع رمز الدولة</label><input id="whatsappNumber" type="tel" inputmode="numeric" placeholder="9665XXXXXXXX"><div class="hint">اكتب الأرقام فقط مع رمز الدولة، دون علامة + أو مسافات.</div></div>
+          <div class="field"><label for="logoFile">شعار الموقع</label><input id="logoFile" type="file" accept="image/png,image/jpeg,image/webp"><div class="hint">PNG بخلفية شفافة هو الأفضل. الحد الأقصى 20 ميجابايت.</div><img id="logoPreview" alt="معاينة الشعار" style="display:none;max-width:180px;max-height:90px;object-fit:contain;background:#292929;padding:10px;border-radius:8px"><button class="btn danger" id="removeLogoButton" type="button">إزالة الشعار</button></div>
+          <div class="field"><label for="heroEyebrow">السطر الصغير أعلى العنوان</label><input id="heroEyebrow" maxlength="120"></div>
+          <div class="field"><label for="heroHeading">العنوان الرئيسي - السطر الأول والثاني</label><textarea id="heroHeading" rows="2"></textarea></div>
+          <div class="field"><label for="heroHighlight">الكلمة المميزة في العنوان</label><input id="heroHighlight" maxlength="80"></div>
+          <div class="field"><label for="heroDescription">وصف الواجهة الرئيسية</label><textarea id="heroDescription"></textarea></div>
+          <div class="form-grid">
+            <div class="field"><label for="heroPrimaryButton">نص الزر الأول</label><input id="heroPrimaryButton"></div>
+            <div class="field"><label for="heroSecondaryButton">نص الزر الثاني</label><input id="heroSecondaryButton"></div>
+          </div>
+          <div class="field"><label for="aboutEyebrow">عنوان قسم نبذة عنا</label><input id="aboutEyebrow"></div>
+          <div class="field"><label for="aboutHeading">عنوان قسم نبذة عنا</label><textarea id="aboutHeading" rows="2"></textarea></div>
+          <div class="field"><label for="aboutDescription">نص قسم نبذة عنا</label><textarea id="aboutDescription"></textarea></div>
+          <div class="field"><label for="tourEyebrow">السطر الصغير لقسم الجولة الافتراضية</label><input id="tourEyebrow"></div>
+          <div class="field"><label for="tourHeading">عنوان قسم الجولة الافتراضية</label><textarea id="tourHeading" rows="2"></textarea></div>
+          <div class="field"><label for="tourDescription">وصف قسم الجولة الافتراضية</label><textarea id="tourDescription"></textarea></div>
+          <div class="field"><label for="tourButton">نص زر الجولة الافتراضية</label><input id="tourButton"></div>
+          <div id="siteContentMessage" class="message"></div>
+          <div class="form-actions"><button class="btn primary" id="saveSiteContentButton" type="button">حفظ إعدادات الموقع</button></div>
+        </div>
         <div class="panel">
           <h2>ملاحظات</h2>
           <p class="hint">• يتم حفظ بيانات المشاريع والتصنيفات في قاعدة بيانات D1.</p>
@@ -156,7 +178,7 @@ async function checkSession() {
   catch { showLogin(); }
 }
 async function refreshAll() {
-  await loadHeroVideoSettings();
+  await Promise.all([loadHeroVideoSettings(),loadSiteContentSettings()]);
   const [p,c]=await Promise.all([api('/projects'),api('/categories')]);
   projects=p.projects||[]; categories=c.categories||[];
   renderProjects(); renderCategories(); renderCategoryOptions();
@@ -164,6 +186,48 @@ async function refreshAll() {
   $('publishedProjects').textContent=projects.filter(x=>x.status==='published').length;
   $('totalCategories').textContent=categories.length;
 }
+let currentLogoUrl='';
+const siteSettingFields={
+  whatsapp_number:'whatsappNumber',hero_eyebrow:'heroEyebrow',hero_heading:'heroHeading',
+  hero_highlight:'heroHighlight',hero_description:'heroDescription',
+  hero_primary_button:'heroPrimaryButton',hero_secondary_button:'heroSecondaryButton',
+  about_eyebrow:'aboutEyebrow',about_heading:'aboutHeading',about_description:'aboutDescription',
+  tour_eyebrow:'tourEyebrow',tour_heading:'tourHeading',tour_description:'tourDescription',tour_button:'tourButton'
+};
+async function loadSiteContentSettings(){
+  try{
+    const data=await api('/site-settings');
+    Object.entries(siteSettingFields).forEach(([key,id])=>{ $(id).value=data[key]||''; });
+    currentLogoUrl=data.logo_url||'';
+    const preview=$('logoPreview');
+    if(currentLogoUrl){preview.src=currentLogoUrl;preview.style.display='block';}else{preview.removeAttribute('src');preview.style.display='none';}
+  }catch(err){showMessage('siteContentMessage','تعذر تحميل إعدادات الموقع: '+err.message);}
+}
+$('logoFile').addEventListener('change',()=>{
+  const file=$('logoFile').files[0];if(!file)return;
+  if(!['image/png','image/jpeg','image/webp'].includes(file.type)){showMessage('siteContentMessage','اختر صورة PNG أو JPG أو WEBP.');$('logoFile').value='';return;}
+  if(file.size>20*1024*1024){showMessage('siteContentMessage','حجم الشعار يتجاوز 20 ميجابايت.');$('logoFile').value='';return;}
+  const preview=$('logoPreview');preview.src=URL.createObjectURL(file);preview.style.display='block';clearMessage('siteContentMessage');
+});
+$('removeLogoButton').addEventListener('click',()=>{
+  currentLogoUrl='';$('logoFile').value='';$('logoPreview').removeAttribute('src');$('logoPreview').style.display='none';
+});
+$('saveSiteContentButton').addEventListener('click',async()=>{
+  if(busy)return;clearMessage('siteContentMessage');setBusy(true,'saveSiteContentButton');
+  try{
+    const file=$('logoFile').files[0];
+    if(file){
+      const form=new FormData();form.append('file',file);form.append('project_id','general');form.append('image_type','logo');
+      const uploaded=await api('/upload',{method:'POST',body:form});currentLogoUrl=uploaded.url;
+    }
+    const payload={logo_url:currentLogoUrl};
+    Object.entries(siteSettingFields).forEach(([key,id])=>payload[key]=$(id).value.trim());
+    await api('/site-settings',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    $('logoFile').value='';showMessage('siteContentMessage','تم حفظ إعدادات الموقع بنجاح. حدّث صفحة الزوار لمشاهدة التغييرات.','success');
+  }catch(err){showMessage('siteContentMessage',err.message);}
+  finally{setBusy(false,'saveSiteContentButton');}
+});
+
 let currentHeroVideoUrl='';
 async function loadHeroVideoSettings(){
   try{
