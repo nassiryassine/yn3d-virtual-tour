@@ -142,14 +142,14 @@ async function getAllSiteSettings(db, columns) {
   const defaults = {
     hero_video_url: "", logo_url: "", whatsapp_number: "",
     hero_eyebrow: "INDEPENDENT 3D DESIGNER · RIYADH",
-    hero_heading: "DESIGN\\nYOUR", hero_highlight: "VISION.",
+    hero_heading: "DESIGN\nYOUR", hero_highlight: "VISION.",
     hero_description: "Architectural visualization that turns ideas into immersive experiences.",
     hero_primary_button: "EXPLORE PROJECTS", hero_secondary_button: "DISCOVER MORE",
     about_eyebrow: "01 — THE APPROACH",
-    about_heading: "Spaces are not just seen.\\nThey are experienced.",
+    about_heading: "Spaces are not just seen.\nThey are experienced.",
     about_description: "Architectural imagery, detailed environments and interactive 360° tours — created to help clients understand and feel every space before it is built.",
     tour_eyebrow: "GO BEYOND THE IMAGE",
-    tour_heading: "STEP INSIDE\\nTHE DESIGN.",
+    tour_heading: "STEP INSIDE\nTHE DESIGN.",
     tour_description: "Explore architectural spaces through immersive 360° virtual tours.",
     tour_button: "LAUNCH VIRTUAL TOUR"
   };
@@ -265,8 +265,8 @@ async function handleApi(request, env) {
     const body = await request.json().catch(() => ({}));
     if (body.hero_video_url && !/^https:\/\//i.test(String(body.hero_video_url))) return json({ error: "رابط فيديو الواجهة غير صالح." }, 400);
     if (body.logo_url && !/^https:\/\//i.test(String(body.logo_url))) return json({ error: "رابط الشعار غير صالح." }, 400);
-    const phone = String(body.whatsapp_number || "").replace(/[\\s()+.-]/g, "");
-    if (Object.prototype.hasOwnProperty.call(body, "whatsapp_number") && phone && !/^\\d{8,15}$/.test(phone)) return json({ error: "أدخل رقم واتساب مع رمز الدولة، من 8 إلى 15 رقماً." }, 400);
+    const phone = String(body.whatsapp_number || "").replace(/[\s()+.-]/g, "");
+    if (Object.prototype.hasOwnProperty.call(body, "whatsapp_number") && phone && !/^\d{8,15}$/.test(phone)) return json({ error: "أدخل رقم واتساب مع رمز الدولة، من 8 إلى 15 رقماً." }, 400);
     if (Object.prototype.hasOwnProperty.call(body, "whatsapp_number")) body.whatsapp_number = phone;
     await saveSiteSettings(env.DB, settingColumns, body);
     return json({ ok: true });
