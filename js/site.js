@@ -64,8 +64,8 @@ const menu=document.querySelector('.menu-toggle');if(menu){menu.addEventListener
 
 // Apply editable homepage copy, logo and WhatsApp contact from public settings.
 (async function applyPublicSiteSettings(){
-  const escText=(id,value)=>{const el=document.getElementById(id);if(el&&value)el.textContent=value;};
-  const setMultiline=(id,value)=>{const el=document.getElementById(id);if(!el||!value)return;el.replaceChildren();String(value).split(/\r?\n/).forEach((line,index)=>{if(index)el.appendChild(document.createElement('br'));el.appendChild(document.createTextNode(line));});};
+  const escText=(id,value)=>{const el=document.getElementById(id);if(el&&value!==undefined&&value!==null)el.textContent=value;};
+  const setMultiline=(id,value)=>{const el=document.getElementById(id);if(!el||value===undefined||value===null)return;el.replaceChildren();String(value).split(/\r?\n/).forEach((line,index)=>{if(index)el.appendChild(document.createElement('br'));el.appendChild(document.createTextNode(line));});};
   try{
     const response=await fetch('/api/public/site-settings',{headers:{'Accept':'application/json'}});
     if(!response.ok)return;
